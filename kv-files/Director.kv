@@ -1,0 +1,45 @@
+<Director> :
+    md_bg_color: [40 / 255, 40 / 255, 180 / 255, 80 / 255]
+
+    Card :
+        spacing: 120
+        padding: 40
+
+        GridLayout:
+            valign: 'center'
+            cols: 2
+            rows: None
+
+            AnchorLayout:
+
+                MDIconButton :
+                    user_font_size: "30sp"
+                    icon_color: [1, 1, 1, 1]
+                    icon: 'arrow-left'
+                    md_bg_color: [10 / 255, 10 / 255, 140 / 255, 255 / 255]
+                    on_press: root.manager.current = 'login'
+
+            AnchorLayout:
+
+                MDIconButton :
+                    user_font_size: "30sp"
+                    icon_color: [1, 1, 1, 1]
+                    icon: 'door'
+                    md_bg_color: [10 / 255, 10 / 255, 140 / 255, 255 / 255]
+                    on_press: app.stop()
+
+        Widget:
+            height: 100
+
+        MyButton :
+            text : 'Отчеты'
+            md_bg_color: [10 / 255, 10 / 255, 140 / 255, 100 / 255]
+            on_release: root.manager.current = 'reports'
+
+        MyButton :
+            text : 'Справичники, прейскурант'
+            md_bg_color: [10 / 255, 10 / 255, 140 / 255, 100 / 255]
+            on_release: root.manager.current = 'handbooks'
+
+        Widget:
+            height: 100

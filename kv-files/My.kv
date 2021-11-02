@@ -1,0 +1,60 @@
+<Card@MDCard>:
+    size_hint: (.7, .8)
+    pos_hint: {"center_x": .5, "center_y": .5}
+    elevation: 15
+    padding: 20
+    spacing: 20
+    orientation: 'vertical'
+    md_bg_color: [10 / 255, 10 / 255, 140 / 255, 100 / 255]
+
+<ButtonExit@MDFillRoundFlatButton>:
+    pos_hint: {"center_x": .5}
+    font_size: 15
+    md_bg_color: [40 / 255, 40 / 255, 180 / 255, 100 / 255]
+    text_color: [1, 1, 1, 1]
+    text: '<- ВЫЙТИ ИЗ ПРИЛОЖЕНИЯ'
+
+<MyImage@Image>:
+    pos_hint: {"center_x": .5, "center_y": .5}
+    allow_stretch: True
+    size_hint: (1, 1)
+
+<MyLabel@MDLabel>:
+    font_style: 'Button'
+    color: [1, 1, 1, 200 / 255]
+    halign: 'center'
+    size_hint_y: None
+
+<MyTextField@MDTextField>:
+    pos_hint: {"center_x": .5}
+    icon_right_color: [1, 1, 1, 1]
+    helper_text: 'Check the field!'
+    helper_text_mode: 'on_error'
+    color_mode: 'primary'
+    mode: 'rectangle'
+    size_hint_y: None
+    size_hint_x: None
+    height: 40
+    font_size: 20
+    width: 220
+
+<MyButton@MDFillRoundFlatButton>:
+    pos_hint: {"center_x": .5}
+    font_size: 15
+    md_bg_color: [40 / 255, 40 / 255, 180 / 255, 100 / 255]
+    text_color: [1, 1, 1, 1]
+    size_hint_x: None
+
+<MyIconButton@MDFillRoundFlatIconButton>:
+    pos_hint: {"center_x": .5}
+    font_size: 15
+    md_bg_color: [40 / 255, 40 / 255, 180 / 255, 100 / 255]
+    text_color: [1, 1, 1, 1]
+    size_hint_x: None
+
+<MyCheckBox@CheckBox>:
+    size_hint: None, None
+    md_bg_color: [1 / 255, 1 / 255, 1 / 255, 1]
+    size: "48dp", "48dp"
+    pos_hint: {'center_x': .5, 'center_y': .5}
+    active: False

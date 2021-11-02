@@ -1,0 +1,95 @@
+<MyOrders>:
+
+    cont1: cont1
+    cont2: cont2
+
+    BoxLayout:
+
+        AnchorLayout:
+
+            GridLayout:
+                cols: 2
+                rows: None
+
+                Card:
+
+                    size_hint: .8, .85
+                    pos_hint: {'center_x': .5, 'center_y': .5}
+                    md_bg_color: [255/255, 255/255, 255/255, 0.8]
+                    MyLabel:
+                        color: [1, 0, 0, 1]
+                        text: 'Активные заказы'
+
+                    ScrollView:
+
+                        BoxLayout:
+
+                            id: cont1
+                            orientation: "vertical"
+                            size_hint_y: None
+                            height: self.minimum_height
+
+                            MDTextButton:
+
+                                text: 'game 1_'
+                                heigh: dp(60)
+                Card:
+
+                    size_hint: .8, .85
+                    pos_hint: {'center_x': .5, 'center_y': .5}
+                    md_bg_color: [255/255, 255/255, 255/255, 0.8]
+                    MyLabel:
+                        color: [1, 0, 0, 1]
+                        text: 'Неактивные заказы'
+
+                    ScrollView:
+
+                        BoxLayout:
+
+                            id: cont2
+                            orientation: "vertical"
+                            size_hint_y: None
+                            height: self.minimum_height
+
+                            MDTextButton:
+
+                                text: 'game 1_'
+                                heigh: dp(60)
+    GridLayout:
+
+        size_hint: (1, .05)
+        valign: 'top'
+        cols: 3
+        rows: None
+        spacing: 10
+
+        AnchorLayout:
+
+            MDIconButton :
+                user_font_size: "20sp"
+                icon_color: [1, 1, 1, 1]
+                icon: 'arrow-left'
+                md_bg_color: [249 / 255, 166 / 255, 2 / 255, 255 / 255]
+                on_press: root.manager.current = 'customer'
+
+        AnchorLayout:
+
+            MDIconButton :
+                user_font_size: "20sp"
+                icon_color: [1, 1, 1, 1]
+                icon: 'arrow-up'
+                md_bg_color: [249 / 255, 166 / 255, 2 / 255, 255 / 255]
+                on_press: root.load_data()
+
+        AnchorLayout:
+
+            MDIconButton :
+                user_font_size: "20sp"
+                icon_color: [1, 1, 1, 1]
+                icon: 'door'
+                md_bg_color: [249 / 255, 166 / 255, 2 / 255, 255 / 255]
+                on_press: app.stop()
+
+        Widget:
+
+        Widget:

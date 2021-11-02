@@ -1,0 +1,140 @@
+<SignUp>:
+    last_btn: last_btn
+    field_country: field_country
+    field_city: field_city
+    field_street: field_street
+    filed_house: filed_house
+    field_flat: field_flat
+    surname: surname
+    user_name: user_name
+    middle_name: middle_name
+    email: email
+    phone: phone
+    login: login
+    password1: password1
+    password2: password2
+    check_box: check_box
+
+    PageLayout:
+
+        Card:
+            md_bg_color: [255/255, 255/255, 255/255, 0.8]
+
+            Widget:
+                height: 20
+
+            MyButton:
+                md_bg_color: [1/255, 1/255, 255/255, 150 / 255]
+                text: '<- НАЗАД'
+                on_press: root.manager.current = 'login'
+
+            MyLabel:
+                text: "Откуда Вы"
+                font_size: 30
+                color: [40 / 255, 40 / 255, 180 / 255, 150 / 255]
+
+            MyTextField:
+                id: field_country
+                hint_text: "Страна"
+
+            MyTextField:
+                id: field_city
+                hint_text: "Город"
+
+            MyLabel:
+                font_size: 30
+                color: [40 / 255, 40 / 255, 180 / 255, 150 / 255]
+
+            MyTextField:
+                id: field_street
+                hint_text: "Улица"
+
+            MyTextField:
+                id: filed_house
+                hint_text: "Дом"
+
+            MyTextField:
+                id: field_flat
+                hint_text: "Квартира"
+
+            Widget:
+                height: 20
+
+        Card:
+            md_bg_color: [255/255, 255/255, 255/255, 0.8]
+
+            Widget:
+                height: 20
+
+            MyLabel:
+                text: "Контактные данные"
+                font_size: 30
+                color: [40 / 255, 40 / 255, 180 / 255, 150 / 255]
+
+            MyTextField:
+                id: surname
+                hint_text: "Фамилия"
+
+            MyTextField:
+                id: user_name
+                hint_text : "Имя"
+
+            MyTextField :
+                id: middle_name
+                hint_text : "Отчество"
+
+            MyTextField:
+                id: email
+                hint_text: "Email"
+
+            MyTextField:
+                id: phone
+                hint_text: "Телефон"
+
+            Widget:
+                height: 20
+
+        Card:
+            md_bg_color: [255/255, 255/255, 255/255, 0.8]
+
+            Widget:
+                height: 20
+
+            MyLabel:
+                text: "Данные для авторизации"
+                font_size: 30
+                color: [40 / 255, 40 / 255, 180 / 255, 150 / 255]
+
+            MyTextField:
+                id: login
+                hint_text: "Логин"
+
+            MyTextField:
+                id: password1
+                hint_text: "Пароль"
+                password: True
+
+            MyTextField:
+                id: password2
+                hint_text: "Повторите пароль"
+                password: True
+
+            MyCheckBox:
+                id: check_box
+                on_active: root.on_checkbox_active()
+
+            MyLabel:
+                text: "Принимаю условия Политики конфиденциальности и даю согласие на обработку моих персональных данных."
+                font_size: 15
+                underline: True
+                color: [40 / 255, 40 / 255, 180 / 255, 150 / 255]
+
+            MyButton:
+                id: last_btn
+                md_bg_color: [1/255, 1/255, 255/255, 150 / 255]
+                text : 'Зарегистрироваться'
+                disabled: True
+                on_press: root.button_sign_up()
+
+            Widget:
+                height: 20

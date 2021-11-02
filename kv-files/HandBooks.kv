@@ -1,0 +1,147 @@
+<HandBooks> :
+    cont_cities: cont_cities
+    cont_fleets: cont_fleets
+    cont_services: cont_services
+    cont_kinds: cont_kinds
+    md_bg_color: [1, 1, 1, 1]
+
+    BoxLayout:
+
+        TabbedPanel:
+
+            border: [0, 0, 0, 0]
+            background_image: 'pictures/white.jpg'
+            do_default_tab: False
+
+            TabbedPanelItem:
+
+                text: 'Города'
+                background_color: [0, 1, 0, .9]
+                md_bg_color: [10 / 255, 10 / 255, 140 / 255, 100 / 255]
+
+                AnchorLayout:
+
+                    Card:
+
+                        size_hint: .8, .85
+                        pos_hint: {'center_x': .5, 'center_y': .5}
+                        md_bg_color: [255/255, 255/255, 255/255, 0.8]
+
+                        ScrollView:
+                            BoxLayout:
+                                id: cont_cities
+                                orientation: "vertical"
+                                size_hint_y: None
+                                height: self.minimum_height
+                                MDTextButton:
+                                    text: 'game 1_'
+                                    heigh: dp(60)
+            TabbedPanelItem:
+
+                text: 'Услуги'
+                background_color: [0, 0, 1, .9]
+                md_bg_color: [10 / 255, 10 / 255, 140 / 255, 100 / 255]
+
+                AnchorLayout:
+
+                    Card:
+
+                        size_hint: .8, .85
+                        pos_hint: {'center_x': .5, 'center_y': .5}
+                        md_bg_color: [255/255, 255/255, 255/255, 0.8]
+
+                        ScrollView:
+                            BoxLayout:
+                                id: cont_services
+                                orientation: "vertical"
+                                size_hint_y: None
+                                height: self.minimum_height
+                                MDTextButton:
+                                    text: 'game 1_'
+                                    heigh: dp(60)
+
+            TabbedPanelItem:
+
+                text: 'Транспорт'
+                background_color: [128/255, 128/255, 0 , .9]
+                md_bg_color: [10 / 255, 10 / 255, 140 / 255, 100 / 255]
+
+                AnchorLayout:
+
+                    Card:
+                        size_hint: .8, .85
+                        pos_hint: {'center_x': .5, 'center_y': .5}
+                        md_bg_color: [255/255, 255/255, 255/255, 0.8]
+
+                        ScrollView:
+                            BoxLayout:
+                                id: cont_kinds
+                                orientation: "vertical"
+                                size_hint_y: None
+                                height: self.minimum_height
+                                MDTextButton:
+                                    text: 'game 1_'
+                                    heigh: dp(60)
+
+            TabbedPanelItem:
+
+                text: 'Парки'
+                background_color: [0, 128/255, 128/255, .9]
+                md_bg_color: [10 / 255, 10 / 255, 140 / 255, 100 / 255]
+
+                AnchorLayout:
+
+                    Card:
+
+                        size_hint: .8, .85
+                        pos_hint: {'center_x': .5, 'center_y': .5}
+                        md_bg_color: [255/255, 255/255, 255/255, 0.8]
+
+                        ScrollView:
+                            BoxLayout:
+                                id: cont_fleets
+                                orientation: "vertical"
+                                size_hint_y: None
+                                height: self.minimum_height
+                                MDTextButton:
+                                    text: 'game 1_'
+                                    heigh: dp(60)
+
+    GridLayout:
+
+        size_hint: (1, .05)
+        valign: 'top'
+        cols: 3
+        rows: None
+        spacing: 10
+
+        AnchorLayout:
+
+            MDIconButton :
+                user_font_size: "20sp"
+                icon_color: [1, 1, 1, 1]
+                icon: 'arrow-left'
+                md_bg_color: [249 / 255, 166 / 255, 2 / 255, 255 / 255]
+                on_press: root.manager.current = 'director'
+
+        AnchorLayout:
+
+            MDIconButton :
+                user_font_size: "20sp"
+                icon_color: [1, 1, 1, 1]
+                icon: 'arrow-up'
+                md_bg_color: [249 / 255, 166 / 255, 2 / 255, 255 / 255]
+                on_press: root.load_data()
+
+        AnchorLayout:
+
+            MDIconButton :
+                user_font_size: "20sp"
+                icon_color: [1, 1, 1, 1]
+                icon: 'door'
+                md_bg_color: [249 / 255, 166 / 255, 2 / 255, 255 / 255]
+                on_press: app.stop()
+
+        Widget:
+
+        Widget:

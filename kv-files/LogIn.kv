@@ -1,0 +1,41 @@
+<LogIn>:
+    my_login: my_login
+    my_password: my_password
+    md_bg_color: [40/255, 40/255, 180/255, 255 /255]
+
+    Card:
+
+        ButtonExit:
+            on_press: app.stop()
+
+        MyImage:
+            source: 'pictures/1.jpg'
+
+        MyLabel:
+            text: 'Добро пожаловать!'
+            font_size: 30
+
+        MyTextField:
+            id: my_login
+            hint_text : "логин"
+            icon_right: 'login'
+
+        MyTextField:
+            id: my_password
+            hint_text : "пароль"
+            icon_right: 'eye-off'
+            password: True
+
+        MyButton:
+            id: lets_go
+            text : 'ВОЙТИ'
+            on_press : root.button_login()
+
+        MyButton:
+            text: 'Забыли пароль?'
+            on_press: root.manager.current = 'get_password'
+
+        MyIconButton:
+            icon: "account-plus"
+            text: 'Зарегистрироваться'
+            on_press: root.manager.current = 'sign_up'

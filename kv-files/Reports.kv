@@ -1,0 +1,76 @@
+<Reports> :
+
+    statistic: statistic
+    volume_per_month: volume_per_month
+
+    Accordion:
+
+        orientation: 'vertical'
+
+        AccordionItem:
+            title: 'Статистика'
+            GridLayout:
+                padding: 80
+                spacing: 20
+                pos_hint: {"center_x": .5, "center_y": .5}
+                cols: 2
+                rows: None
+                spacing: '8dp'
+                size_hint_y: None
+                height: self.minimum_height
+                id: statistic
+                Label:
+                    text: '1'
+
+        AccordionItem:
+            title: 'Объемы услуг за месяц'
+            GridLayout:
+                padding: 80
+                spacing: 20
+                pos_hint: {"center_x": .5, "center_y": .5}
+                cols: 2
+                rows: None
+                spacing: '8dp'
+                size_hint_y: None
+                height: self.minimum_height
+                id: volume_per_month
+                Label:
+                    text: '5'
+    GridLayout:
+
+        size_hint: (1, .05)
+        valign: 'top'
+        cols: 3
+        rows: None
+        spacing: 10
+
+        AnchorLayout:
+
+            MDIconButton :
+                user_font_size: "20sp"
+                icon_color: [1, 1, 1, 1]
+                icon: 'arrow-left'
+                md_bg_color: [249 / 255, 166 / 255, 2 / 255, 255 / 255]
+                on_press: root.manager.current = 'director'
+
+        AnchorLayout:
+
+            MDIconButton :
+                user_font_size: "20sp"
+                icon_color: [1, 1, 1, 1]
+                icon: 'arrow-up'
+                md_bg_color: [249 / 255, 166 / 255, 2 / 255, 255 / 255]
+                on_press: root.load_data()
+
+        AnchorLayout:
+
+            MDIconButton :
+                user_font_size: "20sp"
+                icon_color: [1, 1, 1, 1]
+                icon: 'door'
+                md_bg_color: [249 / 255, 166 / 255, 2 / 255, 255 / 255]
+                on_press: app.stop()
+
+        Widget:
+
+        Widget:
