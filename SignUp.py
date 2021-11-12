@@ -2,7 +2,9 @@ from kivy.properties import ObjectProperty
 from kivymd.uix.screen import MDScreen
 
 from Notification import Notification
-from WithDB import WithDB
+from DB_Recorder import db_representatives
+from collections import namedtuple
+from DbOperator import DbOperator
 
 
 class SignUp(MDScreen):
@@ -49,132 +51,111 @@ class SignUp(MDScreen):
         return up_symbol and low_symbol and number
 
     def __check_city(self, title):
-        db_pointer = WithDB()
-        city_id = []
-        if db_pointer.get_smth('get_city_id_with_city_title', [title.text], city_id):
-            if len(city_id) == 0:
-                self.note.universal_note('Извините, но указанный город не обслуживается нашей компанией!', [title])
-                return False
+        if not DbOperator().check_exists_city_with_title(title.text):
+            self.note.universal_note('Компания не обслуживает указанный город!', [title])
+            return False
         return True
 
     def __check_not_login(self, title):
-        db_pointer = WithDB()
-        user_id = []
-        if db_pointer.get_smth('get_user_id_with_login', [title.text], user_id):
-            if len(user_id) == 1:
-                self.note.universal_note('Пользователь с указанным логином уже есть!', [title])
-                return False
+        if DbOperator().check_exists_user_with_login(title.text):
+            self.note.universal_note('Пользователь с указанным логином уже есть!', [title])
+            return False
         return True
 
     def button_sign_up(self):
-        db_pointer = WithDB()
-        if (self.field_country.text == ''
-                or self.field_city.text == ''
-                or self.field_street.text == ''
-                or self.filed_house.text == ''
-                or self.field_flat.text == ''
-                or self.surname.text == ''
-                or self.user_name.text == ''
-                or self.middle_name.text == ''
-                or self.email.text == ''
-                or self.phone.text == ''
-                or self.login.text == ''
-                or self.password1.text == ''
-                or self.password2.text == ''):
-            self.note.universal_note('Не все поля заполнены!', [])
-            return None
-        elif self.password1.text != self.password2.text:
-            self.note.universal_note('Пароли не совпадают!',
-                                     [self.password1, self.password2]
-                                     )
-            return None
+        if not DbOperator().try_connection():
+            self.note.universal_note('Отсутствует соединение с одной из БД!', [])
+            return False
+        SignUpForm = namedtuple(
+            "SignUpForm",
+            [
+                'login',
+                'password',
+                'email',
+                'phone_number',
+                'country',
+                'city',
+                'street',
+                'home_number',
+                'flat_number',
+                'lastname',
+                'name',
+                'middle_name',
+            ]
+        )
+        fields = SignUpForm(
+            login=self.login.text,
+            password=self.password1.text,
+            email=self.email.text,
+            phone_number=self.phone.text,
+            country=self.field_country.text,
+            city=self.field_city.text,
+            street=self.field_street.text,
+            home_number=self.filed_house.text,
+            flat_number=self.field_flat.text,
+            lastname=self.surname.text,
+            name=self.user_name.text,
+            middle_name=self.middle_name.text
+        )
+        for value in fields:
+            if value == '':
+                self.note.universal_note('Не все поля заполнены!', [])
+                return None
+        if self.password1.text != self.password2.text:
+            self.note.universal_note('Пароли не совпадают!', [self.password1, self.password2])
         elif not self.__check_city(self.field_city):
             return None
         elif not self.__check_not_login(self.login):
             return None
         elif not self.__check_data():
-            self.note.universal_note("""Пароль должен содрежать, как минимум, одну строчную и одну прописную буквы, а также цифру!""",
-                                     [self.password1, self.password2]
-                                     )
+            self.note.universal_note(
+                """Пароль должен содрежать, как минимум, одну строчную и одну прописную буквы, а также цифру!""",
+                [self.password1, self.password2]
+            )
             return None
         else:
-            if self.__sign_up(self.login.text,
-                              self.password1.text,
-                              self.email.text,
-                              self.phone.text,
-                              self.field_country.text,
-                              self.field_city.text,
-                              self.field_street.text,
-                              self.filed_house.text,
-                              self.field_flat.text,
-                              self.surname.text,
-                              self.user_name.text,
-                              self.middle_name.text
-                              ):
+            if self.__sign_up(fields):
                 self.note.universal_note('Регистрация прошла успешно!', [])
                 self.manager.current = 'login'
             else:
-                self.note.universal_note('Ошибка. Проверьте корректность введенных данных и проверьте состояние соединения с базой данных!', [])
+                self.note.universal_note(
+                    'Ошибка. Проверьте корректность введенных данных и проверьте состояние соединения с базой данных!',
+                    []
+                )
                 return None
 
-    def __sign_up(self, login, password, email, phone_number, country, city,
-                  street, home_number, flat_number, lastname, name, middle_name):
-        if not self.__sign_up_check(login, password, email, phone_number, country, city,
-                                    street, home_number, flat_number, lastname, name, middle_name):
-            db_pointer = WithDB()
-            db_pointer.insert_delete_alter_smth('delete_user_with_login', [login])
+    def __sign_up(self, fields):
+        if not self.__sign_up_check(fields):
+            if not DbOperator().delete_user_with_login(fields.login):
+                self.note.universal_note('Критическая ошибка!\nСвяжитесь с администратором.',
+                                         [self.password1, self.password2]
+                                         )
             return False
         return True
 
     @staticmethod
-    def __sign_up_check(login, password, email, phone_number, country, city,
-                        street, home_number, flat_number, lastname, name, middle_name):
-        db_pointer = WithDB()
-        check = db_pointer.insert_delete_alter_smth('insert_user',
-                                                    [login,
-                                                     password,
-                                                     email,
-                                                     phone_number
-                                                     ]
-                                                    )
-        if check:
-            user_id = []
-            if not db_pointer.get_smth('get_user_id_with_login', [login], user_id):
+    def __sign_up_check(fields):
+        if DbOperator().create_user(
+                fields.login,
+                fields.password,
+                fields.email,
+                fields.phone_number
+        ):
+            print("user eas created")
+            user_id = DbOperator().get_user_id_with_login(fields.login)
+            if user_id is None:
                 return False
-            check = db_pointer.insert_delete_alter_smth('insert_customer',
-                                                        [user_id[0][0],
-                                                         country,
-                                                         street,
-                                                         home_number,
-                                                         flat_number,
-                                                         lastname,
-                                                         name,
-                                                         middle_name
-                                                         ]
-                                                        )
-            if check:
-                try:
-                    customer_id = []
-                    customers_city = []
-                    if not db_pointer.get_smth('get_customer_id_with_user_id', [user_id[0][0]], customer_id):
-                        return False
-                    if not db_pointer.get_smth('get_city_id_with_city_title', [city], customers_city):
-                        return False
-                    check = db_pointer.insert_delete_alter_smth('insert_customers_city', [customer_id[0][0],
-                                                                                          customers_city[0][0]
-                                                                                          ]
-                                                                )
-                except:
-                    print('MISTAKEEE!!!')
+            if DbOperator().create_customer([user_id, fields.country, fields.street, fields.home_number,
+                                             fields.flat_number, fields.lastname, fields.name, fields.middle_name]):
+                print("customer was created")
+                customer_id = DbOperator().get_customer_id_with_user_id(user_id)
+                customers_city = DbOperator().get_city_id_with_city_title(fields.city)
+                if customer_id is None or customers_city is None:
                     return False
-                if check:
-                    role_id = []
-                    if not db_pointer.get_smth('get_role_id_with_role_title', ['Клиент'], role_id):
-                        return False
-                    check = db_pointer.insert_delete_alter_smth('insert_users_role',
-                                                                [user_id[0][0],
-                                                                 role_id[0][0],
-                                                                 ]
-                                                                )
-                    return check
+                if DbOperator().insert_customers_city(customer_id, customers_city):
+                    print("customers_city was created")
+                    role_id = DbOperator().get_role_id_with_role_title('Клиент')
+                    if role_id is None:
+                        return None
+                    return DbOperator().insert_users_role(user_id, role_id)
         return False

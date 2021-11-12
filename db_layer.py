@@ -127,19 +127,20 @@ class MyDatabase:
                     """, #fleets_city
             """INSERT INTO transport ( 
                         kind_id,
-                        transport_number,
                         fleet_id
                     ) 
-                    VALUES ( %s, %s, %s )
+                    VALUES ( %s, %s )
                     """, #transport
             """INSERT INTO my_order ( 
                         commissions,
                         executions,
                         customer_id,
                         operator_id,
-                        courier_id
+                        courier_id,
+                        stage_id,
+                        status_id,
                     ) 
-                    VALUES ( %s, %s, %s, %s, %s )
+                    VALUES ( %s, %s, %s, %s, %s, %s, %s )
                     """, #order
             """INSERT INTO orders_transport ( 
                     transport_id,
@@ -228,13 +229,13 @@ class MyDatabase:
                 ON UPDATE CASCADE ON DELETE CASCADE;
                 """,
             """
-                ALTER TABLE orders_transport ADD CONSTRAINT fk_orders_transport__my_order
-                FOREIGN KEY (my_order_id) REFERENCES my_order(my_order_id) 
+                ALTER TABLE orders_transport ADD CONSTRAINT fk_orders_transport__transport
+                FOREIGN KEY (transport_id) REFERENCES transport(transport_id) 
                 ON UPDATE CASCADE ON DELETE CASCADE;
                 """,
             """
-                ALTER TABLE orders_transport ADD CONSTRAINT fk_orders_transport__transport
-                FOREIGN KEY (transport_id) REFERENCES transport(transport_id) 
+                ALTER TABLE orders_transport ADD CONSTRAINT fk_orders_transport__my_order
+                FOREIGN KEY (my_order_id) REFERENCES my_order(my_order_id) 
                 ON UPDATE CASCADE ON DELETE CASCADE;
                 """,
             """
@@ -265,6 +266,16 @@ class MyDatabase:
             """
                 ALTER TABLE order_services_end_city ADD CONSTRAINT fk_order_services_end_city__city
                 FOREIGN KEY (city_id) REFERENCES city(city_id)
+                ON UPDATE CASCADE ON DELETE CASCADE;
+                """,
+            """
+                ALTER TABLE my_order ADD CONSTRAINT fk_my_order__stage
+                FOREIGN KEY (stage_id) REFERENCES stage(stage_id)
+                ON UPDATE CASCADE ON DELETE CASCADE;
+                """,
+            """
+                ALTER TABLE my_order ADD CONSTRAINT fk_my_order__status
+                FOREIGN KEY (status_id) REFERENCES status(status_id)
                 ON UPDATE CASCADE ON DELETE CASCADE;
                 """
         ]
@@ -361,7 +372,7 @@ class MyDatabase:
                             salary REAL NOT NULL,
                             requirements TEXT, 
                             duties TEXT,
-                            status TEXT
+                            status_id INT
                         ) ENGINE = InnoDB
                 """, #employee
             """
@@ -382,7 +393,6 @@ class MyDatabase:
                 CREATE TABLE IF NOT EXISTS transport (
                     transport_id INT PRIMARY KEY AUTO_INCREMENT,
                     kind_id INT NOT NULL,
-                    transport_number TEXT NOT NULL,
                     fleet_id INT NOT NULL 
                 ) ENGINE = InnoDB
                 """, #transport
@@ -393,14 +403,16 @@ class MyDatabase:
                     executions DATE,
                     customer_id INT NOT NULL,
                     operator_id INT,
-                    courier_id INT
+                    courier_id INT,
+                    stage_id INT,
+                    status_id INT
                 ) ENGINE = InnoDB
                 """, #my_order
             """
                 CREATE TABLE IF NOT EXISTS orders_transport (
-                    orders_transport_id INT PRIMARY KEY AUTO_INCREMENT,
                     transport_id INT NOT NULL,
-                    my_order_id INT NOT NULL
+                    my_order_id INT NOT NULL,
+                    PRIMARY KEY(transport_id, my_order_id)
                 ) ENGINE = InnoDB
                 """, #orders_transport
             """
@@ -511,11 +523,11 @@ def main():
     password = 'Qwerty084922052001'
     database = 'coursework'
     my_db = MyDatabase(host, user, password)
-    #my_db.delete_database(database)
+    my_db.delete_database(database)
     my_db.generate_database(database)
-    #my_db.create_tables()
-    #my_db.fill_tables()
-    #my_db.add_foreign_keys()
+    my_db.create_tables()
+    my_db.fill_tables()
+    my_db.add_foreign_keys()
     for i in my_db.tables_names:
         my_db.show_table(i)
 
