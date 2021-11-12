@@ -17,6 +17,9 @@ from Courier import Courier
 from kivy.core.window import Window
 from MyOrders import MyOrders
 
+import MSSql, DB_Recorder
+
+
 Config.set('kivy', 'keyboard_mode', 'systemanddock')
 Window.size = (480, 853)
 
@@ -39,9 +42,9 @@ class Myapp(MDApp):
 
     def build(self):
         sm = ScreenManager(transition=FallOutTransition())
+        sm.add_widget(SignUp(name='sign_up'))
         sm.add_widget(LogIn(name='login'))
         sm.add_widget(GetPassword(name='get_password'))
-        sm.add_widget(SignUp(name='sign_up'))
         sm.add_widget(ChooseRole(name='choose_role'))
         sm.add_widget(Director(name='director'))
         sm.add_widget(Customer(name='customer'))
