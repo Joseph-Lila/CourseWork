@@ -66,38 +66,19 @@ class SignUp(MDScreen):
         if not DbOperator().try_connection():
             self.note.universal_note('Отсутствует соединение с одной из БД!', [])
             return False
-        SignUpForm = namedtuple(
-            "SignUpForm",
-            [
-                'login',
-                'password',
-                'email',
-                'phone_number',
-                'country',
-                'city',
-                'street',
-                'home_number',
-                'flat_number',
-                'lastname',
-                'name',
-                'middle_name',
-            ]
-        )
-        fields = SignUpForm(
-            login=self.login.text,
-            password=self.password1.text,
-            email=self.email.text,
-            phone_number=self.phone.text,
-            country=self.field_country.text,
-            city=self.field_city.text,
-            street=self.field_street.text,
-            home_number=self.filed_house.text,
-            flat_number=self.field_flat.text,
-            lastname=self.surname.text,
-            name=self.user_name.text,
-            middle_name=self.middle_name.text
-        )
-        for value in fields:
+        SignUpConstruction = namedtuple("SignUpConstruction", ['login', 'password', 'email', 'phone_number', 'country',
+                                                               'city_title', 'street', 'home_number', 'flat_number',
+                                                               'lastname', 'name', 'middle_name', 'role_title'
+                                                               ]
+                                        )
+        sign_up_tuple = SignUpConstruction(login=self.login.text, password=self.password1.text, email=self.email.text,
+                                           phone_number=self.phone.text, country=self.field_country.text,
+                                           city_title=self.field_city.text, street=self.field_street.text,
+                                           home_number=self.filed_house.text, flat_number=self.field_flat.text,
+                                           lastname=self.surname.text, name=self.user_name.text,
+                                           middle_name=self.middle_name.text, role_title='Клиент'
+                                           )
+        for value in sign_up_tuple:
             if value == '':
                 self.note.universal_note('Не все поля заполнены!', [])
                 return None
@@ -114,48 +95,14 @@ class SignUp(MDScreen):
             )
             return None
         else:
-            if self.__sign_up(fields):
-                self.note.universal_note('Регистрация прошла успешно!', [])
+            if self.__transaction_sign_up(sign_up_tuple):
                 self.manager.current = 'login'
-            else:
-                self.note.universal_note(
-                    'Ошибка. Проверьте корректность введенных данных и проверьте состояние соединения с базой данных!',
-                    []
-                )
-                return None
 
-    def __sign_up(self, fields):
-        if not self.__sign_up_check(fields):
-            if not DbOperator().delete_user_with_login(fields.login):
-                self.note.universal_note('Критическая ошибка!\nСвяжитесь с администратором.',
-                                         [self.password1, self.password2]
-                                         )
+    def __transaction_sign_up(self, sign_up_tuple) -> bool:
+        if not DbOperator().sign_up_transaction(sign_up_tuple):
+            self.note.universal_note('Транзакция не прошла успешно.', [])
             return False
-        return True
+        else:
+            self.note.universal_note('Транзакция прошла успешно.', [])
+            return True
 
-    @staticmethod
-    def __sign_up_check(fields):
-        if DbOperator().create_user(
-                fields.login,
-                fields.password,
-                fields.email,
-                fields.phone_number
-        ):
-            print("user eas created")
-            user_id = DbOperator().get_user_id_with_login(fields.login)
-            if user_id is None:
-                return False
-            if DbOperator().create_customer([user_id, fields.country, fields.street, fields.home_number,
-                                             fields.flat_number, fields.lastname, fields.name, fields.middle_name]):
-                print("customer was created")
-                customer_id = DbOperator().get_customer_id_with_user_id(user_id)
-                customers_city = DbOperator().get_city_id_with_city_title(fields.city)
-                if customer_id is None or customers_city is None:
-                    return False
-                if DbOperator().insert_customers_city(customer_id, customers_city):
-                    print("customers_city was created")
-                    role_id = DbOperator().get_role_id_with_role_title('Клиент')
-                    if role_id is None:
-                        return None
-                    return DbOperator().insert_users_role(user_id, role_id)
-        return False

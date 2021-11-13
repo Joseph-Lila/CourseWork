@@ -69,13 +69,11 @@ class CustomerOrder(MDScreen):
         if not db_pointer.insert_delete_alter_smth('add_order', [now, customer_id, stage_id, status_id]):
             self.note.universal_note('Заказ не был создан!', [])
             return None
-        print(status_id)
         orders_id = []
         if not db_pointer.get_smth('get_last_orders_id', [now, customer_id, stage_id, status_id], orders_id):
             self.note.universal_note('Проблемы с БД!', [])
             return None
         else:
-            print(orders_id)
             orders_id = orders_id[0][0]
         service_id = []
         if not db_pointer.get_smth('get_service_with_title', [collection[-1]], service_id):

@@ -56,3 +56,7 @@ class AnyBDInterface(abc.ABC):
     @abc.abstractmethod
     def insert_users_role(self, user_id, role_id) -> bool:
         pass
+
+    @abc.abstractmethod
+    def sign_up_transaction(self, sign_up_tuple) -> bool:
+        pass

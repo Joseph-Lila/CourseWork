@@ -126,7 +126,6 @@ class HandBooks(MDScreen):
         collection.reverse()
         collection.append(title)
         db_pointer = WithDB()
-        print(collection)
         if not db_pointer.insert_delete_alter_smth(query, collection):
             return None
 

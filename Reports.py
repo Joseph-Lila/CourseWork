@@ -49,7 +49,6 @@ class Reports(MDScreen):
             return None
         if len(data) == 0:
             return None
-        print(data)
 
     def __customers_cities_giagramm(self):
         pass

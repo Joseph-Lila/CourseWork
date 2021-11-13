@@ -64,7 +64,6 @@ class DbOperator(AnyBDInterface):
         results = list()
         for item in self.representatives_collection:
             results.append(item.check_exists_user_with_login(login))
-        print(self.__get_outcomes_value(results))
         return self.__get_outcomes_value(results)
 
     def check_exists_city_with_title(self, title) -> bool:
@@ -126,3 +125,9 @@ class DbOperator(AnyBDInterface):
         for item in self.representatives_collection:
             results.append(item.insert_users_role(user_id, role_id))
         return self.__make_true_decision(results)
+
+    def sign_up_transaction(self, sign_up_tuple) -> bool:
+        results = []
+        for item in self.representatives_collection:
+            results.append(item.sign_up_transaction(sign_up_tuple))
+        return self.__check_true_collection(results)

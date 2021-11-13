@@ -1,8 +1,6 @@
-from pymssql import *
 from AnyBDInterface import AnyBDInterface
 from DB_Recorder import db_recorder
 import pyodbc
-import pandas as pd
 
 
 @db_recorder
@@ -53,6 +51,15 @@ class MSSql(AnyBDInterface):
             return True
         except:
             return False
+
+    def __execute(self, execute_str):
+        try:
+            connector = pyodbc.connect(self.__connect_str, autocommit=False)
+            connector.execute(execute_str)
+            connector.commit()
+            connector.close()
+        except:
+            pass
 
     def __select(self, what_, from_) -> list:
         try:
@@ -143,6 +150,82 @@ class MSSql(AnyBDInterface):
 
     def insert_customers_city(self, customer_id, city_id) -> bool:
         return self.__insert_into("customers_city", 2, [(customer_id, city_id)])
+
+    def sign_up_transaction(self, sign_up_tuple) -> bool:
+        sql = f"""
+USE Coursework_MSSQL;
+        
+BEGIN TRANSACTION [SignUp]
+        
+BEGIN TRY
+        
+DECLARE @login varchar(50);
+DECLARE @password varchar(50);
+DECLARE @email varchar(50);
+DECLARE @phone_number varchar(50);
+DECLARE @country varchar(50);
+DECLARE @street varchar(50);
+DECLARE @home_number varchar(50);
+DECLARE @flat_number varchar(50);
+DECLARE @lastname varchar(50);
+DECLARE @name varchar(50);
+DECLARE @middle_name varchar(50);
+DECLARE @city_title varchar(50);
+DECLARE @role_title varchar(50);
+DECLARE @user_id INT;
+DECLARE @customer_id INT;
+DECLARE @customers_city INT;
+DECLARE @role_id iNT;
+        
+SET @login = '{sign_up_tuple.login}';
+SET @password= '{sign_up_tuple.password}';
+SET @email = '{sign_up_tuple.email}';
+SET @phone_number = '{sign_up_tuple.phone_number}';
+SET @country = '{sign_up_tuple.country}'; 
+SET @street = '{sign_up_tuple.street}';
+SET @home_number = {sign_up_tuple.home_number};
+SET @flat_number = {sign_up_tuple.flat_number};
+SET @lastname = '{sign_up_tuple.lastname}';
+SET @name = '{sign_up_tuple.name}';
+SET @middle_name = '{sign_up_tuple.middle_name}'; 
+SET @city_title = '{sign_up_tuple.city_title}';
+SET @role_title = '{sign_up_tuple.role_title}';
+
+INSERT INTO users VALUES (@login, @password, @email, @phone_number);
+        
+SET @user_id = (SELECT [users_id]
+                FROM [dbo].[users]
+                WHERE [login] = @login);
+        
+
+        
+INSERT INTO customer VALUES (@user_id, @country, @street, @home_number, @flat_number, @lastname, @name, @middle_name);        
+        
+SET @customer_id = (SELECT [customer_id]
+                    FROM [dbo].[customer]
+                    WHERE [users_id] = @user_id);
+        
+SET @customers_city = (SELECT [city_id]
+                    FROM [dbo].[city]
+                    WHERE [title] = @city_title);
+        
+INSERT INTO customers_city VALUES (@customer_id, @customers_city);
+        
+SET @role_id = (SELECT [role_id]
+                FROM [dbo].[roles]
+                WHERE [title] = @role_title);
+        
+INSERT INTO users_role VALUES (@user_id, @role_id);
+        
+COMMIT TRANSACTION [SignUp]
+        
+END TRY
+BEGIN CATCH
+ROLLBACK TRANSACTION [SignUp]
+END CATCH
+        """
+        self.__execute(sql)
+        return self.check_exists_user_with_login(sign_up_tuple.login)
 
 
 if __name__ == "__main__":
