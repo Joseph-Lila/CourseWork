@@ -5,10 +5,10 @@ from kivy.uix.widget import Widget
 from kivymd.uix.button import MDFillRoundFlatButton, MDIconButton
 from kivymd.uix.card import MDCard
 from kivymd.uix.screen import MDScreen
-
+from functools import partial
+from DbOperator import DbOperator
 from Notification import Notification
 from User import User
-from WithDB import WithDB
 
 
 class ChooseRole(MDScreen):
@@ -27,16 +27,16 @@ class ChooseRole(MDScreen):
     def __init__(self, **kw):
         super(ChooseRole, self).__init__(**kw)
         self.md_bg_color = [40 / 255, 40 / 255, 180 / 255, 80 / 255]
-        self.add_buttons()
+        self.__add_buttons()
 
-    def add_buttons(self):
+    def __add_buttons(self):
         main_container = self.__main_container()
         main_container.add_widget(self.__icons())
         main_container.add_widget(Widget())
-        self.buttons["Клиент"] = self.__button_customer()
-        self.buttons['Курьер'] = self.__button_courier()
-        self.buttons['Оператор'] = self.__button_operator()
-        self.buttons['Директор'] = self.__button_director()
+        self.buttons["Клиент"] = self.__any_button('Клиент', 'customer')
+        self.buttons['Курьер'] = self.__any_button('Курьер', 'courier')
+        self.buttons['Оператор'] = self.__any_button('Оператор', 'operator')
+        self.buttons['Директор'] = self.__any_button('Директор', 'director')
         for val in self.buttons.values():
             main_container.add_widget(val)
         main_container.add_widget(Widget())
@@ -82,79 +82,21 @@ class ChooseRole(MDScreen):
     def go_to_login(self, *args):
         self.manager.current = 'login'
 
-    def __button_customer(self):
+    def __any_button(self, title_rus, title_en):
         button = MDFillRoundFlatButton()
         button.disabled = True
         button.pos_hint = {"center_x": .5}
         button.font_size = 15
         button.md_bg_color = [10 / 255, 10 / 255, 140 / 255, 100 / 255]
         button.text_color = [1, 1, 1, 1]
-        button.text = 'Клиент'
-        button.bind(on_press=self.customer)
+        button.text = title_rus
+        button.bind(on_press=partial(self.__role, title_rus, title_en))
         return button
 
-    def __button_courier(self):
-        button = MDFillRoundFlatButton()
-        button.disabled = True
-        button.pos_hint = {"center_x": .5}
-        button.font_size = 15
-        button.md_bg_color = [10 / 255, 10 / 255, 140 / 255, 100 / 255]
-        button.text_color = [1, 1, 1, 1]
-        button.text = 'Курьер'
-        button.bind(on_press=self.courier)
-        return button
-
-    def __button_operator(self):
-        button = MDFillRoundFlatButton()
-        button.disabled = True
-        button.pos_hint = {"center_x": .5}
-        button.font_size = 15
-        button.md_bg_color = [10 / 255, 10 / 255, 140 / 255, 100 / 255]
-        button.text_color = [1, 1, 1, 1]
-        button.text = 'Оператор'
-        button.bind(on_press=self.operator)
-        return button
-
-    def __button_director(self):
-        button = MDFillRoundFlatButton()
-        button.disabled = True
-        button.pos_hint = {"center_x": .5}
-        button.font_size = 15
-        button.md_bg_color = [10 / 255, 10 / 255, 140 / 255, 100 / 255]
-        button.text_color = [1, 1, 1, 1]
-        button.text = 'Директор'
-        button.bind(on_press=self.director)
-        return button
-
-    def customer(self, *args):
-
-        role_id = []
-        if not WithDB().get_smth('get_role_id_with_role_title', ['Клиент'], role_id):
+    def __role(self, title_rus, title_en, *args):
+        role_id = DbOperator().get_role_id_with_role_title(title_rus)
+        if role_id == -1:
             self.note.universal_note('Произошло обезличивание!', [])
         else:
-            User.current_role_id = role_id[0]
-        self.manager.current = 'customer'
-
-    def courier(self, *args):
-        role_id = []
-        if not WithDB().get_smth('get_role_id_with_role_title', ['Курьер'], role_id):
-            self.note.universal_note('Произошло обезличивание!', [])
-        else:
-            User.current_role_id = role_id[0]
-        self.manager.current = 'courier'
-
-    def operator(self, *args):
-        role_id = []
-        if not WithDB().get_smth('get_role_id_with_role_title', ['Оператор'], role_id):
-            self.note.universal_note('Произошло обезличивание!', [])
-        else:
-            User.current_role_id = role_id[0]
-        self.manager.current = 'operator'
-
-    def director(self, *args):
-        role_id = []
-        if not WithDB().get_smth('get_role_id_with_role_title', ['Директор'], role_id):
-            self.note.universal_note('Произошло обезличивание!', [])
-        else:
-            User.current_role_id = role_id[0]
-        self.manager.current = 'director'
+            User.current_role_id = role_id
+        self.manager.current = title_en

@@ -26,6 +26,21 @@ class SignUp(MDScreen):
     dialog = None
     note = Notification(dialog)
 
+    def __refresh_fields(self):
+        self.field_country.text = ''
+        self.field_city.text = ''
+        self.field_street.text = ''
+        self.filed_house.text = ''
+        self.field_flat.text = ''
+        self.surname.text = ''
+        self.user_name.text = ''
+        self.middle_name.text = ''
+        self.email.text = ''
+        self.phone.text = ''
+        self.login.text = ''
+        self.password1.text = ''
+        self.password2.text = ''
+
     def dialog_close(self, *args):
         self.dialog.dismiss(force=True)
 
@@ -96,6 +111,7 @@ class SignUp(MDScreen):
             return None
         else:
             if self.__transaction_sign_up(sign_up_tuple):
+                self.__refresh_fields()
                 self.manager.current = 'login'
 
     def __transaction_sign_up(self, sign_up_tuple) -> bool:

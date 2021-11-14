@@ -114,7 +114,7 @@ class DbOperator(AnyBDInterface):
             results.append(item.insert_customers_city(customer_id, city_id))
         return self.__make_true_decision(results)
 
-    def get_role_id_with_role_title(self, title):
+    def get_role_id_with_role_title(self, title) -> int:
         results = []
         for item in self.representatives_collection:
             results.append(item.get_role_id_with_role_title(title))
@@ -131,3 +131,115 @@ class DbOperator(AnyBDInterface):
         for item in self.representatives_collection:
             results.append(item.sign_up_transaction(sign_up_tuple))
         return self.__check_true_collection(results)
+
+    def get_user_id_with_login_and_password(self, login, password) -> int:
+        results = []
+        for item in self.representatives_collection:
+            results.append(item.get_user_id_with_login_and_password(login, password))
+        return self.__get_outcomes_value(results)
+
+    def get_user_roles_with_users_id(self, users_id) -> tuple:
+        results = []
+        for item in self.representatives_collection:
+            results.append(item.get_user_roles_with_users_id(users_id))
+        return self.__get_outcomes_value(results)
+
+    def get_order_id_with_courier_id(self, courier_id) -> int:
+        results = []
+        for item in self.representatives_collection:
+            results.append(item.get_order_id_with_courier_id(courier_id))
+        return self.__get_outcomes_value(results)
+
+    def get_stage_id_with_stage_title(self, stage_title) -> int:
+        results = []
+        for item in self.representatives_collection:
+            results.append(item.get_stage_id_with_stage_title(stage_title))
+        return self.__get_outcomes_value(results)
+
+    def get_status_id_with_status_title(self, status_title) -> int:
+        results = []
+        for item in self.representatives_collection:
+            results.append(item.get_status_id_with_status_title(status_title))
+        return self.__get_outcomes_value(results)
+
+    def add_orders_executions_and_stage_id_with_order_id(self, orders_executions, stage_id, order_id) -> bool:
+        results = []
+        for item in self.representatives_collection:
+            results.append(item.add_orders_executions_and_stage_id_with_order_id(orders_executions,
+                                                                                 stage_id,
+                                                                                 order_id
+                                                                                 )
+                           )
+        return self.__check_true_collection(results)
+
+    def check_orders_executions_and_stage_id_with_order_id(self, order_id) -> tuple:
+        results = []
+        for item in self.representatives_collection:
+            results.append(item.check_orders_executions_and_stage_id_with_order_id(order_id))
+        if self.__check_equal(results):
+            return results[-1]
+        return tuple()
+
+    def check_orders_status_id_with_order_id(self, order_id) -> int:
+        results = []
+        for item in self.representatives_collection:
+            results.append(item.check_orders_status_id_with_order_id(order_id))
+        if self.__check_equal(results):
+            return results[-1]
+        return -1
+
+    def get_passive_orders_data_for_customer_with_customer_id(self, customer_id) -> tuple:
+        results = []
+        for item in self.representatives_collection:
+            results.append(item.get_passive_orders_data_for_customer_with_customer_id(customer_id))
+        if self.__check_equal(results):
+            return results[-1]
+        return tuple()
+
+    def get_active_orders_data_for_customer_with_customer_id(self, customer_id) -> tuple:
+        results = []
+        for item in self.representatives_collection:
+            results.append(item.get_active_orders_data_for_customer_with_customer_id(customer_id))
+        if self.__check_equal(results):
+            return results[-1]
+        return tuple()
+
+    def alter_orders_status_id_with_order_id(self, orders_status, order_id) -> bool:
+        results = []
+        for item in self.representatives_collection:
+            results.append(item.alter_orders_status_id_with_order_id(orders_status, order_id))
+        return self.__check_true_collection(results)
+
+    def get_services_costs_with_title(self, title) -> tuple:
+        results = []
+        for item in self.representatives_collection:
+            results.append(item.get_services_costs_with_title(title))
+        if self.__check_equal(results):
+            return results[-1]
+        return tuple()
+
+    def get_city_titles(self) -> tuple:
+        results = []
+        for item in self.representatives_collection:
+            results.append(item.get_city_titles())
+        return self.__get_outcomes_value(results)
+
+    def check_exists_order_with_commissions_and_customer_id(self, commissions, customer_id) -> bool:
+        results = []
+        for item in self.representatives_collection:
+            results.append(item.check_exists_order_with_commissions_and_customer_id(commissions, customer_id))
+        return self.__check_true_collection(results)
+
+    def customer_order_transaction(self, customer_order_tuple) -> bool:
+        results = []
+        for item in self.representatives_collection:
+            results.append(item.customer_order_transaction(customer_order_tuple))
+        return self.__check_true_collection(results)
+
+    def get_service_titles(self) -> tuple:
+        results = []
+        for item in self.representatives_collection:
+            results.append(item.get_service_titles())
+        if self.__check_equal(results):
+            return results[-1]
+        return tuple()

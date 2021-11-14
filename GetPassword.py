@@ -10,6 +10,10 @@ class GetPassword(MDScreen):
     dialog = None
     note = Notification(None)
 
+    def __refresh_fields(self):
+        self.phone.text = ''
+        self.email.text = ''
+
     def dialog_close(self, *args):
         self.dialog.dismiss(force=True)
 
@@ -18,3 +22,4 @@ class GetPassword(MDScreen):
             self.note.universal_note('Не все поля заполнены!', [])
         else:
             self.note.universal_note('На указанную почту и телефон \nбыли высланы необходимые данные!', [])
+        self.__refresh_fields()

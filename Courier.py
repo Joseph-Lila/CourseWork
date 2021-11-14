@@ -1,13 +1,12 @@
 from datetime import datetime
 
 from kivy.properties import ObjectProperty
-from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.image import Image
 from kivymd.uix.screen import MDScreen
 
+from DbOperator import DbOperator
 from Notification import Notification
 from User import User
-from WithDB import WithDB
 
 
 class Courier(MDScreen):
@@ -23,47 +22,32 @@ class Courier(MDScreen):
         self.load_data()
 
     def load_data(self):
-        ans = []
-        db_pointer = WithDB()
-        if not db_pointer.get_smth('get_order_with_courier_id', [User.user_id], ans):
+        ans = DbOperator().get_order_id_with_courier_id(User.user_id)
+        if ans == -1:
             self.check = False
             self.label.text = 'Заказов нет'
             self.btn1.disabled = True
             self.btn2.disabled = True
-            return None
-        elif len(ans) == 0:
-            self.check = False
-            self.label.text = 'Заказов нет'
-            self.btn1.disabled = True
-            self.btn2.disabled = True
-            return None
+            return
         else:
             self.check = True
-            ans = ans[0][0]
             self.label.text = 'Заказ № ' + str(ans)
             self.btn1.disabled = False
             self.btn2.disabled = False
 
     def completed(self):
-        ans = []
-        db_pointer = WithDB()
-        if not db_pointer.get_smth('get_order_with_courier_id', [User.user_id], ans):
+        ans = DbOperator().get_order_id_with_courier_id(User.user_id)
+        if ans == -1:
             self.note.universal_note('Ошибка подключения к базе данных!', [])
-            return None
-        if len(ans) == 0:
-            self.note.universal_note('Неизвестная ошибка!', [])
-            return None
-        ans = ans[0][0]
-        now = datetime.date(datetime.today())
-        stage_id = []
-        if not db_pointer.get_smth('get_stage_id_with_stage_title', ['Выполнен'], stage_id):
-            return None
+            return
+        now = datetime.today().strftime("%Y-%m-%d %H.%M.%S")
+        stage_id = DbOperator().get_stage_id_with_stage_title('Выполнен')
+        if stage_id == -1:
+            return
         else:
-            stage_id = stage_id[0][0]
-        if not db_pointer.insert_delete_alter_smth('add_orders_executions_and_stage_id_with_order_id',
-                                                   [now, stage_id, ans]):
-            self.note.universal_note('Операция была прервана!', [])
-            return None
+            if not DbOperator().add_orders_executions_and_stage_id_with_order_id(now, stage_id, ans):
+                self.note.universal_note('Операция была прервана!', [])
+                return
         self.note.universal_note('Изменения были зафиксированы!', [])
         self.load_data()
 
