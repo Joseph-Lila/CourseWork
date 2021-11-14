@@ -19,6 +19,8 @@ class Courier(MDScreen):
 
     def __init__(self, **kw):
         super().__init__(**kw)
+
+    def on_enter(self, *args):
         self.load_data()
 
     def load_data(self):
@@ -40,7 +42,7 @@ class Courier(MDScreen):
         if ans == -1:
             self.note.universal_note('Ошибка подключения к базе данных!', [])
             return
-        now = datetime.today().strftime("%Y-%m-%d %H.%M.%S")
+        now = datetime.today().strftime("%Y-%d-%m %H:%M:%S")
         stage_id = DbOperator().get_stage_id_with_stage_title('Выполнен')
         if stage_id == -1:
             return

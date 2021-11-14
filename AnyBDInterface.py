@@ -124,3 +124,24 @@ class AnyBDInterface(abc.ABC):
     @abc.abstractmethod
     def get_service_titles(self) -> tuple:
         pass
+
+    @abc.abstractmethod
+    def add_courier_id_and_operator_id_into_order_with_order_id(self,
+                                                                courier_id,
+                                                                operator_id,
+                                                                stage_id,
+                                                                order_id
+                                                                ) -> bool:
+        pass
+
+    @abc.abstractmethod
+    def check_courier_id_not_null_with_order_id(self, order_id) -> bool:
+        pass
+
+    @abc.abstractmethod
+    def get_free_couriers(self) -> tuple:
+        pass
+
+    @abc.abstractmethod
+    def get_paid_orders(self) -> tuple:
+        pass

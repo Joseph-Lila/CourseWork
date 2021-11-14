@@ -243,3 +243,37 @@ class DbOperator(AnyBDInterface):
         if self.__check_equal(results):
             return results[-1]
         return tuple()
+
+    def check_courier_id_not_null_with_order_id(self, order_id) -> bool:
+        results = []
+        for item in self.representatives_collection:
+            results.append(item.check_courier_id_not_null_with_order_id(order_id))
+        return self.__check_true_collection(results)
+
+    def add_courier_id_and_operator_id_into_order_with_order_id(self,
+                                                                courier_id,
+                                                                operator_id,
+                                                                stage_id,
+                                                                order_id
+                                                                ) -> bool:
+        results = []
+        for item in self.representatives_collection:
+            results.append(item.add_courier_id_and_operator_id_into_order_with_order_id(courier_id,
+                                                                                        operator_id,
+                                                                                        stage_id,
+                                                                                        order_id
+                                                                                        )
+                           )
+        return self.__check_true_collection(results)
+
+    def get_paid_orders(self) -> tuple:
+        results = []
+        for item in self.representatives_collection:
+            results.append(item.get_paid_orders())
+        return self.__get_outcomes_value(results)
+
+    def get_free_couriers(self) -> tuple:
+        results = []
+        for item in self.representatives_collection:
+            results.append(item.get_free_couriers())
+        return self.__get_outcomes_value(results)

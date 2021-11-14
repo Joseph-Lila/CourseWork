@@ -149,7 +149,7 @@ class MSSql(AnyBDInterface):
         return True
 
     def check_orders_executions_and_stage_id_with_order_id(self, order_id) -> tuple:
-        results = self.__select_where("orders_executions, stage_id", "my_order", f"order_id = {order_id}")
+        results = self.__select_where("executions, stage_id", "my_order", f"my_order_id = {order_id}")
         if len(results) == 0:
             return ()
         return results[0]
@@ -466,7 +466,8 @@ END CATCH
                     WHERE my_order_id = {order_id} 
                 """
         self.__execute(sql)
-        return (orders_executions, stage_id) == self.check_orders_executions_and_stage_id_with_order_id(order_id)
+        return orders_executions == self.check_orders_executions_and_stage_id_with_order_id(order_id)[0]\
+            .strftime("%Y-%d-%m %H:%M:%S")
 
     def alter_orders_status_id_with_order_id(self, orders_status, order_id) -> bool:
         sql = f"""
@@ -475,7 +476,7 @@ END CATCH
                     WHERE my_order_id = {order_id}
                 """
         self.__execute(sql)
-        return (orders_status, order_id) == self.check_orders_status_id_with_order_id(order_id)
+        return orders_status == self.check_orders_status_id_with_order_id(order_id)
 
     def get_passive_orders_data_for_customer_with_customer_id(self, customer_id) -> tuple:
         results = self.__select_where(
@@ -510,6 +511,65 @@ END CATCH
         if len(results) == 0:
             return -1
         return results[0][0]
+
+    def add_courier_id_and_operator_id_into_order_with_order_id(self,
+                                                                courier_id,
+                                                                operator_id,
+                                                                stage_id,
+                                                                order_id
+                                                                ) -> bool:
+        sql = f"""
+                UPDATE my_order
+                    SET 
+                    courier_id = {courier_id}, operator_id = {operator_id}, stage_id = {stage_id}
+                    WHERE my_order_id = {order_id}
+                """
+        self.__execute(sql)
+        return self.check_courier_id_not_null_with_order_id(order_id)
+
+    def check_courier_id_not_null_with_order_id(self, order_id) -> bool:
+        results = self.__select_where("courier_id", 'my_order', f"my_order_id = {order_id}")
+        if len(results) == 0:
+            return False
+        if results[0][0] is None:
+            return False
+        return True
+
+    def get_free_couriers(self) -> tuple:
+        results = self.__select("users.users_id",
+                                """
+                                users
+                                JOIN
+                                users_role
+                                ON users_role.users_id = users.users_id
+                                JOIN
+                                roles
+                                ON users_role.role_id = roles.role_id
+                                WHERE
+                                roles.title = 'Курьер'
+                                """
+                                )
+        if len(results) == 0:
+            return tuple()
+        return tuple((item[0] for item in results))
+
+    def get_paid_orders(self) -> tuple:
+        results = self.__select("my_order.my_order_id",
+                                """
+                                my_order
+                                JOIN
+                                stage
+                                ON stage.stage_id = my_order.stage_id
+                                JOIN
+                                statuses
+                                ON statuses.status_id = my_order.status_id
+                                WHERE
+                                stage.title = 'На рассмотрении' AND statuses.title = 'Оплачен'
+                                """
+                                )
+        if len(results) == 0:
+            return tuple()
+        return tuple((item[0] for item in results))
 
 
 if __name__ == "__main__":

@@ -11,7 +11,6 @@ from kivymd.uix.textfield import MDTextField
 from DbOperator import DbOperator
 from Notification import Notification
 from User import User
-from kivy.clock import Clock
 
 
 class MyOrders(MDScreen):
@@ -23,19 +22,9 @@ class MyOrders(MDScreen):
 
     def __init__(self, **kw):
         super().__init__(**kw)
-        self.fill_any_cont([self.cont1],
-                           self.__widgets_for_any_ordering,
-                           DbOperator().get_active_orders_data_for_customer_with_customer_id,
-                           True
-                           )
-        self.fill_any_cont([self.cont2],
-                           self.__widgets_for_any_ordering,
-                           DbOperator().get_passive_orders_data_for_customer_with_customer_id,
-                           False
-                           )
 
-    def on_start(self):
-        Clock.schedule_interval(self.load_data(), 3)
+    def on_enter(self, *args):
+        self.load_data()
 
     def fill_any_cont(self, cont, on_press_func, orders_func, add_buttons):
         cont[-1].clear_widgets()
@@ -76,7 +65,7 @@ class MyOrders(MDScreen):
 
     def refusing(self, order_id, *args):
         stage_id = DbOperator().get_stage_id_with_stage_title('Отменен')
-        now = datetime.datetime.today().strftime("%Y-%m-%d %H.%M.%S")
+        now = datetime.datetime.today().strftime("%Y-%d-%m %H:%M:%S")
         if stage_id == -1:
             return
         if not DbOperator().add_orders_executions_and_stage_id_with_order_id(now, stage_id, order_id):
