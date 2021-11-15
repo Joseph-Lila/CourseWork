@@ -20,6 +20,7 @@ from MyOrders import MyOrders
 import MSSql, DB_Recorder
 
 Config.set('kivy', 'keyboard_mode', 'systemanddock')
+keyboard_mode = '3'
 Window.size = (480, 853)
 
 Builder.load_file('kv-files/My.kv')
@@ -31,8 +32,8 @@ Builder.load_file('kv-files/Director.kv')
 Builder.load_file('kv-files/Operator.kv')
 Builder.load_file('kv-files/Courier.kv')
 Builder.load_file('kv-files/HandBooks.kv')
-Builder.load_file('kv-files/Reports.kv')
 Builder.load_file('kv-files/CustomerOrder.kv')
+Builder.load_file('kv-files/Reports.kv')
 Builder.load_file('kv-files/MyOrders.kv')
 
 

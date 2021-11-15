@@ -3,6 +3,7 @@ from datetime import datetime
 from AnyBDInterface import AnyBDInterface
 from DB_Recorder import db_recorder
 import pyodbc
+from collections import Counter
 
 from User import User
 
@@ -364,7 +365,7 @@ SET @begin_city_id = (SELECT
                   FROM
                   city
                   WHERE
-                  city_id = @begin_city_id
+                  title = @begin_city_title
                   );
 
 SET @end_city_id = (SELECT
@@ -372,7 +373,7 @@ SET @end_city_id = (SELECT
                   FROM
                   city
                   WHERE
-                  city_id = @end_city_id
+                  title = @end_city_title
                   );
 
 INSERT INTO order_services_begin_city(city_id, orders_service_id)
@@ -427,6 +428,45 @@ END CATCH
         if len(results) == 0:
             return tuple()
         return tuple((item[0] for item in results))
+
+    def get_services_titles_and_total_costs(self) -> tuple:
+        results = self.__select("services.title, SUM(total_cost) as total_cost",
+                                """
+                                services
+                                JOIN 
+                                orders_service
+                                ON services.service_id = orders_service.service_id
+                                GROUP BY services.title
+                                """
+                                )
+        if len(results) == 0:
+            return tuple()
+        return tuple(results)
+
+    def get_months_quantity_orders(self) -> tuple:
+        results = self.__select("DATENAME(M, MONTH(commissions)) as months, COUNT(my_order_id) as quantity",
+                                "my_order GROUP BY DATENAME(M, MONTH(commissions))")
+        print(results)
+        if len(results) == 0:
+            return tuple()
+        return tuple(results)
+
+    def get_cities_quantity_orders(self) -> tuple:
+        results = self.__select("city.title, COUNT(orders_service.orders_service_id) as quantity",
+                                """
+                                city
+                                JOIN 
+                                order_services_begin_city
+                                ON city.city_id = order_services_begin_city.city_id
+                                JOIN 
+                                orders_service
+                                ON order_services_begin_city.orders_service_id = orders_service.orders_service_id
+                                GROUP BY city.title
+                                """
+                                )
+        if len(results) == 0:
+            return tuple()
+        return tuple(results)
 
     def get_service_titles(self) -> tuple:
         results = self.__select("title", "services")

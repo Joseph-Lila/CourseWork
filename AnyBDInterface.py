@@ -145,3 +145,15 @@ class AnyBDInterface(abc.ABC):
     @abc.abstractmethod
     def get_paid_orders(self) -> tuple:
         pass
+
+    @abc.abstractmethod
+    def get_services_titles_and_total_costs(self) -> tuple:
+        pass
+
+    @abc.abstractmethod
+    def get_months_quantity_orders(self) -> tuple:
+        pass
+
+    @abc.abstractmethod
+    def get_cities_quantity_orders(self) -> tuple:
+        pass

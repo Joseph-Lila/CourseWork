@@ -224,6 +224,20 @@ class DbOperator(AnyBDInterface):
             results.append(item.get_city_titles())
         return self.__get_outcomes_value(results)
 
+    def get_services_titles_and_total_costs(self) -> tuple:
+        results = []
+        for item in self.representatives_collection:
+            results.append(item.get_services_titles_and_total_costs())
+        return self.__get_outcomes_value(results)
+
+    def get_months_quantity_orders(self) -> tuple:
+        results = [item.get_months_quantity_orders() for item in self.representatives_collection]
+        return self.__get_outcomes_value(results)
+
+    def get_cities_quantity_orders(self) -> tuple:
+        results = [item.get_cities_quantity_orders() for item in self.representatives_collection]
+        return self.__get_outcomes_value(results)
+
     def check_exists_order_with_commissions_and_customer_id(self, commissions, customer_id) -> bool:
         results = []
         for item in self.representatives_collection:

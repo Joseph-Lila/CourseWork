@@ -1,21 +1,27 @@
 <Reports> :
 
-    statistic: statistic
-    volume_per_month: volume_per_month
+    services_pie: services_pie
+    months_pie: months_pie
+    cities_pie: cities_pie
 
     Accordion:
 
         orientation: 'vertical'
 
         AccordionItem:
-            title: 'Статистика'
+            title: 'Доходы по услугам'
             FloatLayout:
-                id: statistic
+                id: services_pie
 
         AccordionItem:
-            title: 'Объемы услуг за месяц'
+            title: 'Услуги по месяцам'
             FloatLayout:
-                id: volume_per_month
+                id: months_pie
+
+        AccordionItem:
+            title: 'Услуги по городам'
+            FloatLayout:
+                id: cities_pie
 
     GridLayout:
 
