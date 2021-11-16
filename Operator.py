@@ -57,6 +57,11 @@ class Operator(MDScreen):
                                                                                     ):
             self.note.universal_note('Операция была прервана!', [])
             return
+        if not DbOperator().change_courier_status(courier_id,
+                                                  DbOperator().get_status_id_with_status_title('Занят')
+                                                  ):
+            self.note.universal_note('Операция прервана!', [])
+            return
         self.note.universal_note('Заказ был передан курьеру!', [])
 
     def load_data(self, *args):

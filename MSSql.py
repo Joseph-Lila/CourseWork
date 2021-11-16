@@ -595,8 +595,14 @@ END CATCH
                                 JOIN
                                 roles
                                 ON users_role.role_id = roles.role_id
+                                JOIN 
+                                employee
+                                ON employee.users_id = users.users_id
+                                JOIN
+                                statuses
+                                ON statuses.status_id = employee.status_id
                                 WHERE
-                                roles.title = 'Курьер'
+                                roles.title = 'Курьер' AND statuses.title = 'Свободен'
                                 """
                                 )
         if len(results) == 0:
@@ -694,3 +700,23 @@ END CATCH
                                         kind_id = {int(data[0])}
                                         """
         self.__execute(sql)
+
+    def get_courier_status_id(self, courier_id) -> int:
+        results = self.__select_where("status_id",
+                                      "employee",
+                                      f"employee_id = {courier_id}"
+                                      )
+        if len(results) == 0:
+            return -1
+        return results[0][0]
+
+    def change_courier_status(self, courier_id, status_id) -> bool:
+        sql = f"""
+                        UPDATE employee
+                        SET
+                        status_id = {status_id}
+                        WHERE
+                        employee_id = {courier_id}
+                        """
+        self.__execute(sql)
+        return self.get_courier_status_id(courier_id) == status_id

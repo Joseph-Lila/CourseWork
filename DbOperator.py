@@ -232,6 +232,14 @@ class DbOperator(AnyBDInterface):
                    ]
         return self.__check_true_collection(results)
 
+    def get_courier_status_id(self, courier_id) -> int:
+        results = [item.get_courier_status_id(courier_id) for item in self.representatives_collection]
+        return self.__get_outcomes_value(results, 'int')
+
+    def change_courier_status(self, courier_id, status) -> bool:
+        results = [item.change_courier_status(courier_id, status)for item in self.representatives_collection]
+        return self.__check_true_collection(results)
+
     def get_paid_orders(self) -> tuple:
         results = [item.get_paid_orders() for item in self.representatives_collection]
         return self.__get_outcomes_value(results, 'tuple')

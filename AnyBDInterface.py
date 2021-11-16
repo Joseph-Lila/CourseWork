@@ -114,6 +114,14 @@ class AnyBDInterface(abc.ABC):
         pass
 
     @abc.abstractmethod
+    def change_courier_status(self, courier_id, status) -> bool:
+        pass
+
+    @abc.abstractmethod
+    def get_courier_status_id(self, courier_id) -> int:
+        pass
+
+    @abc.abstractmethod
     def get_city_titles(self) -> tuple:
         pass
 

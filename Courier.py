@@ -50,6 +50,11 @@ class Courier(MDScreen):
             if not DbOperator().add_orders_executions_and_stage_id_with_order_id(now, stage_id, ans):
                 self.note.universal_note('Операция была прервана!', [])
                 return
+        if not DbOperator().change_courier_status(User.user_id,
+                                                  DbOperator().get_status_id_with_status_title('Свободен')
+                                                  ):
+            self.note.universal_note('Операция прервана!', [])
+            return
         self.note.universal_note('Изменения были зафиксированы!', [])
         self.load_data()
 
