@@ -25,9 +25,9 @@ class Notification:
         )
         self.dialog.open()
 
-    def note_with_container(self, cont, *args):
+    def note_with_container(self, cont, title, *args):
         self.dialog = MDDialog(
-            title='Форма',
+            title=title,
             type="custom",
             content_cls=cont[0],
             buttons=[

@@ -12,7 +12,6 @@ from kivymd.uix.textfield import MDTextField
 
 from DbOperator import DbOperator
 from Notification import Notification
-from User import User
 from kivy.uix.button import Button
 
 from collections import namedtuple
@@ -39,7 +38,7 @@ class CustomerOrder(MDScreen):
         widgets = self.__widgets_for_ordering(title)
         for i in range(len(widgets)):
             cont[0].add_widget(widgets[i])
-        self.note.note_with_container(cont)
+        self.note.note_with_container(cont, "Оформление заказа")
 
     def processing(self, order_creator, *args):
 

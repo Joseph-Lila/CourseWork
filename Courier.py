@@ -60,4 +60,4 @@ class Courier(MDScreen):
         im.size_hint_y = None
         im.height = 800
         im.width = 1400
-        self.note.note_with_container([im])
+        self.note.note_with_container([im], "")

@@ -34,7 +34,7 @@ class AnyBDInterface(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def get_user_id_with_login(self, login):
+    def get_user_id_with_login(self, login) -> int:
         pass
 
     @abc.abstractmethod
@@ -156,4 +156,44 @@ class AnyBDInterface(abc.ABC):
 
     @abc.abstractmethod
     def get_cities_quantity_orders(self) -> tuple:
+        pass
+
+    @abc.abstractmethod
+    def get_fleet_titles(self) -> tuple:
+        pass
+
+    @abc.abstractmethod
+    def get_kind_titles(self) -> tuple:
+        pass
+
+    @abc.abstractmethod
+    def get_city_fields_with_title(self, title) -> tuple:
+        pass
+
+    @abc.abstractmethod
+    def get_service_fields_with_title(self, title) -> tuple:
+        pass
+
+    @abc.abstractmethod
+    def get_kind_fields_with_title(self, title) -> tuple:
+        pass
+
+    @abc.abstractmethod
+    def get_fleet_fields_with_title(self, title) -> tuple:
+        pass
+
+    @abc.abstractmethod
+    def alter_city_using_str_collection(self, data):
+        pass
+
+    @abc.abstractmethod
+    def alter_service_using_str_collection(self, data):
+        pass
+
+    @abc.abstractmethod
+    def alter_kind_using_str_collection(self, data):
+        pass
+
+    @abc.abstractmethod
+    def alter_fleet_using_str_collection(self, data):
         pass

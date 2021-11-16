@@ -2,7 +2,6 @@ from kivy.properties import ObjectProperty
 from kivymd.uix.screen import MDScreen
 
 from Notification import Notification
-from DB_Recorder import db_representatives
 from collections import namedtuple
 from DbOperator import DbOperator
 

@@ -3,7 +3,6 @@ from datetime import datetime
 from AnyBDInterface import AnyBDInterface
 from DB_Recorder import db_recorder
 import pyodbc
-from collections import Counter
 
 from User import User
 
@@ -107,7 +106,7 @@ class MSSql(AnyBDInterface):
     def create_user(self, login, password, email, phone_number) -> bool:
         return self.__insert_into("users", 4, [(login, password, email, phone_number)])
 
-    def get_user_id_with_login(self, login):
+    def get_user_id_with_login(self, login) -> int:
         results = self.__select_where("users_id", "users", f"login = '{login}'")
         if len(results) == 0:
             return -1
@@ -152,16 +151,16 @@ class MSSql(AnyBDInterface):
     def check_orders_executions_and_stage_id_with_order_id(self, order_id) -> tuple:
         results = self.__select_where("executions, stage_id", "my_order", f"my_order_id = {order_id}")
         if len(results) == 0:
-            return ()
+            return tuple()
         return results[0]
 
-    def get_customer_id_with_user_id(self, user_id):
+    def get_customer_id_with_user_id(self, user_id) -> int:
         results = self.__select_where("customer_id", "customer", f"users_id = {user_id}")
         if len(results) == 0:
             return -1
         return results[0][0]
 
-    def get_city_id_with_city_title(self, title):
+    def get_city_id_with_city_title(self, title) -> int:
         results = self.__select_where("city_id", "city", f"title = '{title}'")
         if len(results) == 0:
             return -1
@@ -429,6 +428,18 @@ END CATCH
             return tuple()
         return tuple((item[0] for item in results))
 
+    def get_fleet_titles(self) -> tuple:
+        results = self.__select("title", "fleet")
+        if len(results) == 0:
+            return tuple()
+        return tuple((item[0] for item in results))
+
+    def get_kind_titles(self) -> tuple:
+        results = self.__select("title", "transports_kind")
+        if len(results) == 0:
+            return tuple()
+        return tuple((item[0] for item in results))
+
     def get_services_titles_and_total_costs(self) -> tuple:
         results = self.__select("services.title, SUM(total_cost) as total_cost",
                                 """
@@ -446,7 +457,6 @@ END CATCH
     def get_months_quantity_orders(self) -> tuple:
         results = self.__select("DATENAME(M, MONTH(commissions)) as months, COUNT(my_order_id) as quantity",
                                 "my_order GROUP BY DATENAME(M, MONTH(commissions))")
-        print(results)
         if len(results) == 0:
             return tuple()
         return tuple(results)
@@ -611,6 +621,76 @@ END CATCH
             return tuple()
         return tuple((item[0] for item in results))
 
+    def get_city_fields_with_title(self, title) -> tuple:
+        result = self.__select_where("*", "city", f"title = '{title}'")
+        if len(result) == 0:
+            return tuple()
+        return result[-1]
 
-if __name__ == "__main__":
-    pass
+    def get_fleet_fields_with_title(self, title) -> tuple:
+        result = self.__select_where("*", "fleet", f"title = '{title}'")
+        if len(result) == 0:
+            return tuple()
+        return result[-1]
+
+    def get_kind_fields_with_title(self, title) -> tuple:
+        result = self.__select_where("*", "transports_kind", f"title = '{title}'")
+        if len(result) == 0:
+            return tuple()
+        return result[-1]
+
+    def get_service_fields_with_title(self, title) -> tuple:
+        result = self.__select_where("*", "services", f"title = '{title}'")
+        if len(result) == 0:
+            return tuple()
+        return result[-1]
+
+    def alter_city_using_str_collection(self, data):
+        sql = f"""
+                UPDATE city
+                SET
+                title = '{data[1]}'
+                WHERE
+                city_id = {int(data[0])}
+                """
+        self.__execute(sql)
+
+    def alter_fleet_using_str_collection(self, data):
+        sql = f"""
+                        UPDATE fleet
+                        SET
+                        title = '{data[1]}',
+                        description = '{data[2]}',
+                        address = '{data[3]}',
+                        square = {float(data[4])},
+                        stars_quantity = {int(data[5])}
+                        WHERE
+                        fleet_id = {int(data[0])}
+                        """
+        self.__execute(sql)
+
+    def alter_kind_using_str_collection(self, data):
+        sql = f"""
+                                UPDATE transports_kind
+                                SET
+                                description = '{data[1]}',
+                                title = '{data[2]}',
+                                lifting_capacity = {float(data[3])},
+                                volume = {float(data[4])}
+                                WHERE
+                                kind_id = {int(data[0])}
+                                """
+        self.__execute(sql)
+
+    def alter_service_using_str_collection(self, data):
+        sql = f"""
+                                        UPDATE services
+                                        SET
+                                        title = '{data[1]}',
+                                        description = '{data[2]}',
+                                        cost_weight = {float(data[3])},
+                                        cost_radius = {float(data[4])}
+                                        WHERE
+                                        kind_id = {int(data[0])}
+                                        """
+        self.__execute(sql)
