@@ -58,4 +58,5 @@ class Myapp(MDApp):
 
 
 if __name__ == '__main__':
+    print("Congratulates!")
     Myapp().run()
