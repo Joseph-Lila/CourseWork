@@ -151,21 +151,21 @@ class DbOperator(AnyBDInterface):
     def check_orders_executions_and_stage_id_with_order_id(self, order_id) -> tuple:
         results = [item.check_orders_executions_and_stage_id_with_order_id(order_id)
                    for item in self.representatives_collection]
-        self.__get_outcomes_value(results, 'tuple')
+        return self.__get_outcomes_value(results, 'tuple')
 
     def check_orders_status_id_with_order_id(self, order_id) -> int:
         results = [item.check_orders_status_id_with_order_id(order_id) for item in self.representatives_collection]
-        self.__get_outcomes_value(results, 'int')
+        return self.__get_outcomes_value(results, 'int')
 
     def get_passive_orders_data_for_customer_with_customer_id(self, customer_id) -> tuple:
         results = [item.get_passive_orders_data_for_customer_with_customer_id(customer_id)
                    for item in self.representatives_collection]
-        self.__get_outcomes_value(results, 'tuple')
+        return self.__get_outcomes_value(results, 'tuple')
 
     def get_active_orders_data_for_customer_with_customer_id(self, customer_id) -> tuple:
         results = [item.get_active_orders_data_for_customer_with_customer_id(customer_id)
                    for item in self.representatives_collection]
-        self.__get_outcomes_value(results, 'tuple')
+        return self.__get_outcomes_value(results, 'tuple')
 
     def alter_orders_status_id_with_order_id(self, orders_status, order_id) -> bool:
         results = [item.alter_orders_status_id_with_order_id(orders_status, order_id)
@@ -174,7 +174,7 @@ class DbOperator(AnyBDInterface):
 
     def get_services_costs_with_title(self, title) -> tuple:
         results = [item.get_services_costs_with_title(title) for item in self.representatives_collection]
-        self.__get_outcomes_value(results, 'tuple')
+        return self.__get_outcomes_value(results, 'tuple')
 
     def get_city_titles(self) -> tuple:
         results = [item.get_city_titles() for item in self.representatives_collection]
@@ -211,7 +211,7 @@ class DbOperator(AnyBDInterface):
 
     def get_service_titles(self) -> tuple:
         results = [item.get_service_titles() for item in self.representatives_collection]
-        self.__get_outcomes_value(results, 'tuple')
+        return self.__get_outcomes_value(results, 'tuple')
 
     def check_courier_id_not_null_with_order_id(self, order_id) -> bool:
         results = [item.check_courier_id_not_null_with_order_id(order_id) for item in self.representatives_collection]
