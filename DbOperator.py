@@ -10,14 +10,6 @@ class DbOperator(AnyBDInterface):
         results = [item.try_connection() for item in self.representatives_collection]
         return self.__check_true_collection(results)
 
-    def confirm_changes(self):
-        for item in self.representatives_collection:
-            item.confirm_changes()
-
-    def rollback_changes(self):
-        for item in self.representatives_collection:
-            item.rollback_changes()
-
     @staticmethod
     def __check_equal(results) -> bool:
         if len(results) == 0:
@@ -37,24 +29,9 @@ class DbOperator(AnyBDInterface):
                 return False
         return True
 
-    def __make_true_decision(self, results) -> bool:
-        if self.__check_true_collection(results):
-            self.confirm_changes()
-            return True
-        else:
-            self.rollback_changes()
-            return False
-
-    def __make_a_decision(self, results) -> bool:
-        if self.__check_equal(results):
-            self.confirm_changes()
-            return True
-        else:
-            self.rollback_changes()
-            return False
-
-    def __get_outcomes_value(self, results, ans_type):
-        if self.__check_equal(results):
+    @staticmethod
+    def __get_outcomes_value(results, ans_type):
+        if DbOperator().__check_equal(results):
             return results[-1]
         if ans_type == 'str':
             return ''
@@ -80,41 +57,13 @@ class DbOperator(AnyBDInterface):
         results = [item.check_exists_city_with_title(title) for item in self.representatives_collection]
         return self.__get_outcomes_value(results, bool)
 
-    def create_user(self, login, password, email, phone_number) -> bool:
-        results = [item.create_user(login, password, email, phone_number) for item in self.representatives_collection]
-        return self.__make_true_decision(results)
-
-    def get_user_id_with_login(self, login) -> int:
-        results = [item.get_user_id_with_login(login) for item in self.representatives_collection]
-        return self.__get_outcomes_value(results, 'int')
-
-    def delete_user_with_login(self, login) -> bool:
-        results = [item.delete_user_with_login(login) for item in self.representatives_collection]
-        return self.__get_outcomes_value(results, 'bool')
-
-    def create_customer(self, data_collection) -> bool:
-        results = [item.create_customer(data_collection) for item in self.representatives_collection]
-        return self.__make_true_decision(results)
-
     def get_customer_id_with_user_id(self, user_id) -> int:
         results = [item.get_customer_id_with_user_id(user_id) for item in self.representatives_collection]
         return self.__get_outcomes_value(results, 'int')
 
-    def get_city_id_with_city_title(self, title) -> int:
-        results = [item.get_city_id_with_city_title(title) for item in self.representatives_collection]
-        return self.__get_outcomes_value(results, 'int')
-
-    def insert_customers_city(self, customer_id, city_id) -> bool:
-        results = [item.insert_customers_city(customer_id, city_id) for item in self.representatives_collection]
-        return self.__make_true_decision(results)
-
     def get_role_id_with_role_title(self, title) -> int:
         results = [item.get_role_id_with_role_title(title) for item in self.representatives_collection]
         return self.__get_outcomes_value(results, 'int')
-
-    def insert_users_role(self, user_id, role_id) -> bool:
-        results = [item.insert_users_role(user_id, role_id) for item in self.representatives_collection]
-        return self.__make_true_decision(results)
 
     def sign_up_transaction(self, sign_up_tuple) -> bool:
         results = [item.sign_up_transaction(sign_up_tuple) for item in self.representatives_collection]
@@ -129,9 +78,9 @@ class DbOperator(AnyBDInterface):
         results = [item.get_user_roles_with_users_id(users_id) for item in self.representatives_collection]
         return self.__get_outcomes_value(results, 'tuple')
 
-    def get_order_id_with_courier_id(self, courier_id) -> int:
-        results = [item.get_order_id_with_courier_id(courier_id) for item in self.representatives_collection]
-        return self.__get_outcomes_value(results, 'int')
+    def when_shall_i_be_free(self, user_id) -> bool:
+        results = [item.when_shall_i_be_free(user_id) for item in self.representatives_collection]
+        return self.__check_true_collection(results)
 
     def get_stage_id_with_stage_title(self, stage_title) -> int:
         results = [item.get_stage_id_with_stage_title(stage_title) for item in self.representatives_collection]
@@ -141,11 +90,8 @@ class DbOperator(AnyBDInterface):
         results = [item.get_status_id_with_status_title(status_title) for item in self.representatives_collection]
         return self.__get_outcomes_value(results, 'int')
 
-    def add_orders_executions_and_stage_id_with_order_id(self, orders_executions, stage_id, order_id) -> bool:
-        results = [item.add_orders_executions_and_stage_id_with_order_id(orders_executions,
-                                                                         stage_id,
-                                                                         order_id
-                                                                         ) for item in self.representatives_collection]
+    def refusing_transaction(self, order_id) -> bool:
+        results = [item.refusing_transaction(order_id) for item in self.representatives_collection]
         return self.__check_true_collection(results)
 
     def check_orders_executions_and_stage_id_with_order_id(self, order_id) -> tuple:
@@ -209,6 +155,10 @@ class DbOperator(AnyBDInterface):
         results = [item.customer_order_transaction(customer_order_tuple) for item in self.representatives_collection]
         return self.__check_true_collection(results)
 
+    def order_completed_transaction(self, user_id) -> bool:
+        results = [item.order_completed_transaction(user_id) for item in self.representatives_collection]
+        return self.__check_true_collection(results)
+
     def get_service_titles(self) -> tuple:
         results = [item.get_service_titles() for item in self.representatives_collection]
         return self.__get_outcomes_value(results, 'tuple')
@@ -217,27 +167,9 @@ class DbOperator(AnyBDInterface):
         results = [item.check_courier_id_not_null_with_order_id(order_id) for item in self.representatives_collection]
         return self.__check_true_collection(results)
 
-    def add_courier_id_and_operator_id_into_order_with_order_id(self,
-                                                                courier_id,
-                                                                operator_id,
-                                                                stage_id,
-                                                                order_id
-                                                                ) -> bool:
-        results = [item.add_courier_id_and_operator_id_into_order_with_order_id(courier_id,
-                                                                                operator_id,
-                                                                                stage_id,
-                                                                                order_id
-                                                                                )
-                   for item in self.representatives_collection
-                   ]
-        return self.__check_true_collection(results)
-
-    def get_courier_status_id(self, courier_id) -> int:
-        results = [item.get_courier_status_id(courier_id) for item in self.representatives_collection]
-        return self.__get_outcomes_value(results, 'int')
-
-    def change_courier_status(self, courier_id, status) -> bool:
-        results = [item.change_courier_status(courier_id, status)for item in self.representatives_collection]
+    def linking_transaction(self, operator_id, courier_id, order_id) -> bool:
+        results = [item.linking_transaction(operator_id, courier_id, order_id)
+                   for item in self.representatives_collection]
         return self.__check_true_collection(results)
 
     def get_paid_orders(self) -> tuple:

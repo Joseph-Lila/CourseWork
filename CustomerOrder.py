@@ -41,7 +41,9 @@ class CustomerOrder(MDScreen):
         self.note.note_with_container(cont, "Оформление заказа")
 
     def processing(self, order_creator, *args):
-
+        if not DbOperator().try_connection():
+            self.note.universal_note('Нет соединеня с одной из БД!', [])
+            return
         for value in order_creator:
             if hasattr(value, 'text'):
                 if value.text == '':

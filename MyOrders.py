@@ -1,5 +1,3 @@
-import datetime
-
 from kivy.properties import ObjectProperty
 from kivy.uix.widget import Widget
 from kivymd.uix.boxlayout import MDBoxLayout
@@ -64,11 +62,7 @@ class MyOrders(MDScreen):
         self.load_data()
 
     def refusing(self, order_id, *args):
-        stage_id = DbOperator().get_stage_id_with_stage_title('Отменен')
-        now = datetime.datetime.today().strftime("%Y-%d-%m %H:%M:%S")
-        if stage_id == -1:
-            return
-        if not DbOperator().add_orders_executions_and_stage_id_with_order_id(now, stage_id, order_id):
+        if not DbOperator().refusing_transaction(order_id):
             return
         self.load_data()
 
@@ -110,6 +104,9 @@ class MyOrders(MDScreen):
         return ans
 
     def load_data(self, *args):
+        if not DbOperator().try_connection():
+            self.note.universal_note('Нет соединеня с одной из БД!', [])
+            return
         self.fill_any_cont([self.cont1],
                            self.__widgets_for_any_ordering,
                            DbOperator().get_active_orders_data_for_customer_with_customer_id,

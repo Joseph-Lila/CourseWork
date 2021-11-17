@@ -29,32 +29,19 @@ class MSSql(AnyBDInterface):
             trusted_connection
         )
 
-    def try_connection(self) -> bool:
-        try:
-            connector = pyodbc.connect(self.__connect_str)
-            connector.close()
-            return True
-        except:
-            return False
-
-    def confirm_changes(self):
-        self.cursor.commit()
-        self.cursor.close()
-
-    def rollback_changes(self):
-        self.cursor.rollback()
-        self.cursor.close()
-
-    def __insert_into(self, table, quantity_values, data_collection) -> bool:
+    def __select_where(self, what_, from_, where_) -> list:
         try:
             connector = pyodbc.connect(self.__connect_str)
             self.cursor = connector.cursor()
-            insert_str = f"INSERT INTO {table} VALUES (" + '?,' * (quantity_values - 1) + '?' + ")"
-            self.cursor.fast_executemany = True
-            self.cursor.executemany(insert_str, data_collection)
-            return True
+            select_str = f"SELECT {what_} FROM {from_} WHERE {where_}"
+            self.cursor.execute(select_str)
+            ans = []
+            for item in self.cursor:
+                ans.append(item)
+            self.cursor.close()
+            return ans
         except:
-            return False
+            return []
 
     def __execute(self, execute_str):
         try:
@@ -79,48 +66,13 @@ class MSSql(AnyBDInterface):
         except:
             return []
 
-    def __select_where(self, what_, from_, where_) -> list:
+    def try_connection(self) -> bool:
         try:
             connector = pyodbc.connect(self.__connect_str)
-            self.cursor = connector.cursor()
-            select_str = f"SELECT {what_} FROM {from_} WHERE {where_}"
-            self.cursor.execute(select_str)
-            ans = []
-            for item in self.cursor:
-                ans.append(item)
-            self.cursor.close()
-            return ans
-        except:
-            return []
-
-    def __delete_where(self, what_, from_, value):
-        connector = pyodbc.connect(self.__connect_str)
-        self.cursor = connector.cursor()
-        select_str = f"DELETE FROM {from_} WHERE {what_} = {value}"
-        self.cursor.execute(select_str)
-        self.cursor.close()
-
-    def create_customer(self, data_collection):
-        return self.__insert_into("customer", 8, [data_collection])
-
-    def create_user(self, login, password, email, phone_number) -> bool:
-        return self.__insert_into("users", 4, [(login, password, email, phone_number)])
-
-    def get_user_id_with_login(self, login) -> int:
-        results = self.__select_where("users_id", "users", f"login = '{login}'")
-        if len(results) == 0:
-            return -1
-        return results[0][0]
-
-    def delete_user_with_login(self, login) -> bool:
-        try:
-            self.__delete_where("users", "login", f"'{login}'")
+            connector.close()
             return True
         except:
             return False
-
-    def insert_users_role(self, user_id, role_id) -> bool:
-        return self.__insert_into("users_role", 2, [(user_id, role_id)])
 
     def get_role_id_with_role_title(self, title) -> int:
         results = self.__select_where("role_id", "roles", f"title = '{title}'")
@@ -159,15 +111,6 @@ class MSSql(AnyBDInterface):
         if len(results) == 0:
             return -1
         return results[0][0]
-
-    def get_city_id_with_city_title(self, title) -> int:
-        results = self.__select_where("city_id", "city", f"title = '{title}'")
-        if len(results) == 0:
-            return -1
-        return results[0][0]
-
-    def insert_customers_city(self, customer_id, city_id) -> bool:
-        return self.__insert_into("customers_city", 2, [(customer_id, city_id)])
 
     def sign_up_transaction(self, sign_up_tuple) -> bool:
         sql = f"""
@@ -244,6 +187,159 @@ END CATCH
         """
         self.__execute(sql)
         return self.check_exists_user_with_login(sign_up_tuple.login)
+
+    def order_completed_transaction(self, user_id) -> bool:
+        sql = f"""
+                USE Coursework_MSSQL;
+
+                BEGIN TRANSACTION [order_completed]
+                
+                BEGIN TRY
+                
+                DECLARE @order_id int;
+                DECLARE @now datetime;
+                DECLARE @user_id int;
+                DECLARE @courier_id int;
+                DECLARE @stage_id int;
+                DECLARE @status_id int;
+                
+                --set {user_id}
+                SET @user_id = 1;
+                
+                SET @courier_id = (SELECT employee_id
+                                  FROM employee
+                                  WHERE users_id = @user_id);
+                
+                SET @order_id = (SELECT my_order_id
+                                FROM my_order
+                                JOIN
+                                stage
+                                ON stage.stage_id = my_order.stage_id
+                                WHERE courier_id = @courier_id AND stage.title <> 'Выполнен');
+                
+                SET @now = GETDATE();
+                
+                SET @stage_id = (SELECT stage_id
+                                FROM stage
+                                WHERE title = 'Выполнен');
+                
+                UPDATE my_order
+                    SET
+                    executions = @now, stage_id = @stage_id
+                    WHERE my_order_id = @order_id;
+                
+                SET @status_id = (SELECT status_id
+                                 FROM statuses
+                                 WHERE title = 'Свободен');
+                
+                UPDATE employee
+                    SET
+                    status_id = @status_id
+                    WHERE
+                    employee_id = @courier_id;
+                
+                COMMIT TRANSACTION [order_completed]
+                
+                END TRY
+                BEGIN CATCH
+                ROLLBACK TRANSACTION [order_completed]
+                END CATCH
+                """
+        self.__execute(sql)
+        return self.when_shall_i_be_free(user_id)
+
+    def linking_transaction(self, operator_id, courier_id, order_id) -> bool:
+        sql = f"""
+                USE Coursework_MSSQL;
+
+                BEGIN TRANSACTION [linking_transaction]
+                
+                BEGIN TRY
+                
+                DECLARE @order_id int;
+                DECLARE @now datetime;
+                DECLARE @courier_id int;
+                DECLARE @operator_id int;
+                DECLARE @stage_id int;
+                DECLARE @status_id int;
+                
+                SET @operator_id = {operator_id};
+                
+                SET @courier_id = {courier_id};
+                
+                SET @order_id = {order_id};
+                
+                SET @stage_id = (SELECT stage_id
+                                FROM stage
+                                WHERE title = 'Выполняется');
+                
+                SET @order_id = (SELECT my_order_id
+                                FROM my_order
+                                JOIN
+                                stage
+                                ON stage.stage_id = my_order.stage_id
+                                WHERE courier_id = @courier_id AND stage.title <> 'Выполнен');
+                
+                UPDATE my_order
+                    SET 
+                    courier_id = @courier_id, operator_id = @operator_id, stage_id = @stage_id
+                    WHERE my_order_id = @order_id;
+                
+                SET @status_id = (SELECT status_id
+                    FROM statuses
+                    WHERE title = 'Занят');
+                
+                UPDATE employee
+                    SET
+                    status_id = @status_id
+                    WHERE
+                    employee_id = @courier_id;
+                
+                COMMIT TRANSACTION [linking_transaction]
+                
+                END TRY
+                BEGIN CATCH
+                ROLLBACK TRANSACTION [linking_transaction]
+                END CATCH
+                """
+        self.__execute(sql)
+        return self.check_courier_id_not_null_with_order_id(order_id)
+
+    def refusing_transaction(self, order_id) -> bool:
+        sql = f"""
+                USE Coursework_MSSQL;
+
+                BEGIN TRANSACTION [refusing_transaction]
+                
+                BEGIN TRY
+                
+                DECLARE @order_id int;
+                DECLARE @now datetime;
+                DECLARE @stage_id int;
+                
+                SET @order_id = {order_id};
+                
+                SET @stage_id = (SELECT stage_id
+                                FROM stage
+                                WHERE title = 'Отменен');
+                
+                SET @now = GETDATE()
+                
+                UPDATE my_order
+                    SET
+                    executions = @now, stage_id = @stage_id
+                    WHERE my_order_id = @order_id;
+                
+                COMMIT TRANSACTION [refusing_transaction]
+                
+                END TRY
+                BEGIN CATCH
+                ROLLBACK TRANSACTION [refusing_transaction]
+                END CATCH        
+                """
+        self.__execute(sql)
+        return self.check_orders_executions_and_stage_id_with_order_id(order_id)[1] == self\
+            .get_stage_id_with_stage_title('Отменен')
 
     def customer_order_transaction(self, customer_order_tuple) -> bool:
         date_time = datetime.today().strftime("%Y-%d-%m %H:%M:%S")
@@ -484,17 +580,17 @@ END CATCH
             return tuple()
         return tuple((item[0] for item in results))
 
-    def get_order_id_with_courier_id(self, courier_id) -> int:
-        results = self.__select_where("my_order_id",
+    def when_shall_i_be_free(self, user_id) -> bool:
+        results = self.__select_where("users_id",
                                       """      
-                                        my_order
-                                        JOIN stage
-                                        ON stage.stage_id = my_order.stage_id
+                                        employee
+                                        JOIN statuses
+                                        ON statuses.status_id = employee.status_id
                                         """,
-                                      f"courier_id = {courier_id} AND stage.title <> 'Выполнен'",)
+                                      f"users_id = {user_id} AND statuses.title = 'Свободен'", )
         if len(results) == 0:
-            return -1
-        return results[0][0]
+            return False
+        return True
 
     def get_stage_id_with_stage_title(self, stage_title) -> int:
         results = self.__select_where("stage_id", "stage", f"title = '{stage_title}'")
@@ -507,17 +603,6 @@ END CATCH
         if len(results) == 0:
             return -1
         return results[0][0]
-
-    def add_orders_executions_and_stage_id_with_order_id(self, orders_executions, stage_id, order_id) -> bool:
-        sql = f"""
-                UPDATE my_order
-                    SET
-                    executions = '{orders_executions}', stage_id = {stage_id}
-                    WHERE my_order_id = {order_id} 
-                """
-        self.__execute(sql)
-        return orders_executions == self.check_orders_executions_and_stage_id_with_order_id(order_id)[0]\
-            .strftime("%Y-%d-%m %H:%M:%S")
 
     def alter_orders_status_id_with_order_id(self, orders_status, order_id) -> bool:
         sql = f"""
@@ -561,21 +646,6 @@ END CATCH
         if len(results) == 0:
             return -1
         return results[0][0]
-
-    def add_courier_id_and_operator_id_into_order_with_order_id(self,
-                                                                courier_id,
-                                                                operator_id,
-                                                                stage_id,
-                                                                order_id
-                                                                ) -> bool:
-        sql = f"""
-                UPDATE my_order
-                    SET 
-                    courier_id = {courier_id}, operator_id = {operator_id}, stage_id = {stage_id}
-                    WHERE my_order_id = {order_id}
-                """
-        self.__execute(sql)
-        return self.check_courier_id_not_null_with_order_id(order_id)
 
     def check_courier_id_not_null_with_order_id(self, order_id) -> bool:
         results = self.__select_where("courier_id", 'my_order', f"my_order_id = {order_id}")
@@ -700,23 +770,3 @@ END CATCH
                                         kind_id = {int(data[0])}
                                         """
         self.__execute(sql)
-
-    def get_courier_status_id(self, courier_id) -> int:
-        results = self.__select_where("status_id",
-                                      "employee",
-                                      f"employee_id = {courier_id}"
-                                      )
-        if len(results) == 0:
-            return -1
-        return results[0][0]
-
-    def change_courier_status(self, courier_id, status_id) -> bool:
-        sql = f"""
-                        UPDATE employee
-                        SET
-                        status_id = {status_id}
-                        WHERE
-                        employee_id = {courier_id}
-                        """
-        self.__execute(sql)
-        return self.get_courier_status_id(courier_id) == status_id

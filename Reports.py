@@ -48,6 +48,9 @@ class Reports(MDScreen):
         fig.savefig(f'pictures/pie{title}.png')
 
     def load_data(self):
+        if not DbOperator().try_connection():
+            self.note.universal_note('Нет соединеня с одной из БД!', [])
+            return
         self.fill_cities_pie()
         self.fill_services_pie()
         self.fill_months_pie()

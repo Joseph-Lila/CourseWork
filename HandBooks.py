@@ -11,7 +11,6 @@ from functools import partial
 
 
 class HandBooks(MDScreen):
-
     cont_cities = ObjectProperty(None)
     cont_fleets = ObjectProperty(None)
     cont_services = ObjectProperty(None)
@@ -28,20 +27,25 @@ class HandBooks(MDScreen):
         self.load_data()
 
     @staticmethod
-    def __txt_field(text):
+    def __txt_field(text, helper_text, disabled):
         txt_field = MDTextField()
+        if disabled:
+            txt_field.disabled = True
         txt_field.pos_hint = {'center': .5}
         txt_field.color_mode = 'primary'
+        txt_field.helper_text = helper_text
+        txt_field.helper_text_mode = 'persistent'
         txt_field.mode = 'rectangle'
         txt_field.size_hint_x = None
         txt_field.size_hint_y = None
         txt_field.height = 40
         txt_field.font_size = 20
         txt_field.width = 350
+        txt_field.write_tab = False
         txt_field.text = text
         return txt_field
 
-    def any_action(self, entity_func, alter_func, title, height, *args):
+    def any_action(self, entity_func, alter_func, title, height, helper_text_collection, *args):
         entity = entity_func(title)
         if len(entity) == 0:
             self.note.universal_note('Выбрнной Вами сущности не существует...', [])
@@ -56,8 +60,12 @@ class HandBooks(MDScreen):
                                                           on_press=partial(self.change_record, alter_func)
                                                           )
                                     )
+            i = 0
+            disabled = True
             for item in entity:
-                self.cont[0].add_widget(self.__txt_field(str(item)))
+                self.cont[0].add_widget(self.__txt_field(str(item), helper_text_collection[i], disabled))
+                i += 1
+                disabled = False
             self.note.note_with_container(self.cont, 'Окно редактирования')
 
     def change_record(self, changes_func, *args):
@@ -65,7 +73,8 @@ class HandBooks(MDScreen):
         collection.reverse()
         changes_func(collection)
 
-    def fill_any_department(self, cont, data_func, on_press_func, entity_func, alter_func, height):
+    def fill_any_department(self, cont, data_func, on_press_func, entity_func, alter_func, height,
+                            helper_text_collection):
         cont[-1].clear_widgets()
         self.titles.clear()
         data_collection = data_func()
@@ -77,37 +86,45 @@ class HandBooks(MDScreen):
                 cont[-1].add_widget(MDTextButton(text=item,
                                                  heigh=80,
                                                  font_size='30sp',
-                                                 on_press=partial(on_press_func, entity_func, alter_func, item, height),
+                                                 on_press=partial(on_press_func, entity_func, alter_func, item, height,
+                                                                  helper_text_collection),
                                                  pos_hint={"center_x": .5, "center_y": .5}
                                                  )
                                     )
 
     def load_data(self, *args):
+        if not DbOperator().try_connection():
+            self.note.universal_note('Нет соединеня с одной из БД!', [])
+            return
         self.fill_any_department([self.cont_services],
                                  DbOperator().get_service_titles,
                                  self.any_action,
                                  DbOperator().get_service_fields_with_title,
                                  DbOperator().alter_service_using_str_collection,
-                                 330
+                                 330,
+                                 ('service_id', 'title', 'description', 'cost_weight', 'cost_radius')
                                  )
         self.fill_any_department([self.cont_kinds],
                                  DbOperator().get_kind_titles,
                                  self.any_action,
                                  DbOperator().get_kind_fields_with_title,
                                  DbOperator().alter_kind_using_str_collection,
-                                 330
+                                 330,
+                                 ('kind_id', 'description', 'title', 'lifting_capacity', 'volume')
                                  )
         self.fill_any_department([self.cont_cities],
                                  DbOperator().get_city_titles,
                                  self.any_action,
                                  DbOperator().get_city_fields_with_title,
                                  DbOperator().alter_city_using_str_collection,
-                                 150
+                                 150,
+                                 ('city_id', "title")
                                  )
         self.fill_any_department([self.cont_fleets],
                                  DbOperator().get_fleet_titles,
                                  self.any_action,
                                  DbOperator().get_fleet_fields_with_title,
                                  DbOperator().alter_fleet_using_str_collection,
-                                 390
+                                 390,
+                                 ('fleet_id', 'title', 'description', 'address', 'square', 'stars_quantity')
                                  )

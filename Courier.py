@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from kivy.properties import ObjectProperty
 from kivy.uix.image import Image
 from kivymd.uix.screen import MDScreen
@@ -24,8 +22,10 @@ class Courier(MDScreen):
         self.load_data()
 
     def load_data(self):
-        ans = DbOperator().get_order_id_with_courier_id(User.user_id)
-        if ans == -1:
+        if not DbOperator().try_connection():
+            self.note.universal_note('Нет соединеня с одной из БД!', [])
+            return
+        if not DbOperator().when_shall_i_be_free(User.user_id):
             self.check = False
             self.label.text = 'Заказов нет'
             self.btn1.disabled = True
@@ -33,26 +33,12 @@ class Courier(MDScreen):
             return
         else:
             self.check = True
-            self.label.text = 'Заказ № ' + str(ans)
+            self.label.text = 'Появился новый заказ!'
             self.btn1.disabled = False
             self.btn2.disabled = False
 
     def completed(self):
-        ans = DbOperator().get_order_id_with_courier_id(User.user_id)
-        if ans == -1:
-            self.note.universal_note('Ошибка подключения к базе данных!', [])
-            return
-        now = datetime.today().strftime("%Y-%d-%m %H:%M:%S")
-        stage_id = DbOperator().get_stage_id_with_stage_title('Выполнен')
-        if stage_id == -1:
-            return
-        else:
-            if not DbOperator().add_orders_executions_and_stage_id_with_order_id(now, stage_id, ans):
-                self.note.universal_note('Операция была прервана!', [])
-                return
-        if not DbOperator().change_courier_status(User.user_id,
-                                                  DbOperator().get_status_id_with_status_title('Свободен')
-                                                  ):
+        if not DbOperator().order_completed_transaction(User.user_id):
             self.note.universal_note('Операция прервана!', [])
             return
         self.note.universal_note('Изменения были зафиксированы!', [])

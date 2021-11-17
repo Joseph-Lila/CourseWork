@@ -46,25 +46,17 @@ class Operator(MDScreen):
         for i in self.cont2.children:
             if isinstance(i, ToggleButton) and i.state == 'down':
                 order_id = i.text
-        stage_id = DbOperator().get_stage_id_with_stage_title('Выполняется')
-        if stage_id == -1:
-            self.note.universal_note('Операция была прервана!', [])
-            return
-        if not DbOperator().add_courier_id_and_operator_id_into_order_with_order_id(courier_id,
-                                                                                    User.User.user_id,
-                                                                                    stage_id,
-                                                                                    order_id
-                                                                                    ):
-            self.note.universal_note('Операция была прервана!', [])
-            return
-        if not DbOperator().change_courier_status(courier_id,
-                                                  DbOperator().get_status_id_with_status_title('Занят')
-                                                  ):
+        if not DbOperator().linking_transaction(User.User.user_id,
+                                                courier_id,
+                                                order_id):
             self.note.universal_note('Операция прервана!', [])
             return
         self.note.universal_note('Заказ был передан курьеру!', [])
 
     def load_data(self, *args):
+        if not DbOperator().try_connection():
+            self.note.universal_note('Нет соединеня с одной из БД!', [])
+            return
         self.fill_any_cont([self.cont1], DbOperator().get_free_couriers, 'g1')
         self.fill_any_cont([self.cont2], DbOperator().get_paid_orders, 'g2')
 
