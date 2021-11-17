@@ -272,14 +272,7 @@ END CATCH
                 SET @stage_id = (SELECT stage_id
                                 FROM stage
                                 WHERE title = 'Выполняется');
-                
-                SET @order_id = (SELECT my_order_id
-                                FROM my_order
-                                JOIN
-                                stage
-                                ON stage.stage_id = my_order.stage_id
-                                WHERE courier_id = @courier_id AND stage.title <> 'Выполнен');
-                
+                                
                 UPDATE my_order
                     SET 
                     courier_id = @courier_id, operator_id = @operator_id, stage_id = @stage_id
@@ -293,7 +286,7 @@ END CATCH
                     SET
                     status_id = @status_id
                     WHERE
-                    employee_id = @courier_id;
+                    users_id = @courier_id;
                 
                 COMMIT TRANSACTION [linking_transaction]
                 

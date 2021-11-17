@@ -25,7 +25,7 @@ class Courier(MDScreen):
         if not DbOperator().try_connection():
             self.note.universal_note('Нет соединеня с одной из БД!', [])
             return
-        if not DbOperator().when_shall_i_be_free(User.user_id):
+        if DbOperator().when_shall_i_be_free(User.user_id):
             self.check = False
             self.label.text = 'Заказов нет'
             self.btn1.disabled = True

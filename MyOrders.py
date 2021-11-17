@@ -119,7 +119,7 @@ class MyOrders(MDScreen):
                            )
 
     @staticmethod
-    def __txt_field(text_hint):
+    def __txt_field(helper_text):
         txt_field = MDTextField()
         txt_field.pos_hint = {'center': .5}
         txt_field.mode = 'rectangle'
@@ -128,7 +128,8 @@ class MyOrders(MDScreen):
         txt_field.height = 40
         txt_field.font_size = 20
         txt_field.width = 350
-        txt_field.text_hint = text_hint
+        txt_field.helper_text_mode = 'persistent'
+        txt_field.helper_text = helper_text
         return txt_field
 
     @staticmethod
