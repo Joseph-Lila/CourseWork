@@ -28,8 +28,6 @@ class MyOrders(MDScreen):
         cont[-1].clear_widgets()
         self.titles.clear()
         customer_id = DbOperator().get_customer_id_with_user_id(User.user_id)
-        if customer_id == -1:
-            return
         orders = orders_func(customer_id)
         for item in orders:
             self.titles.append(item[0])
