@@ -51,7 +51,7 @@ class MyOrders(MDScreen):
         widgets = fun(collection, add_buttons)
         for item in widgets:
             cont[0].add_widget(item)
-        self.note.note_with_container(cont, "")
+        self.note.note_with_container(cont, "", (.9, .6))
 
     def processing(self, order_id, *args):
         status_id = DbOperator().get_status_id_with_status_title('Оплачен')

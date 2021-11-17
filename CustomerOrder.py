@@ -38,7 +38,7 @@ class CustomerOrder(MDScreen):
         widgets = self.__widgets_for_ordering(title)
         for i in range(len(widgets)):
             cont[0].add_widget(widgets[i])
-        self.note.note_with_container(cont, "Оформление заказа")
+        self.note.note_with_container(cont, "Оформление заказа", (.9, .6))
 
     def processing(self, order_creator, *args):
         if not DbOperator().try_connection():

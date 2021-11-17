@@ -66,7 +66,7 @@ class HandBooks(MDScreen):
                 self.cont[0].add_widget(self.__txt_field(str(item), helper_text_collection[i], disabled))
                 i += 1
                 disabled = False
-            self.note.note_with_container(self.cont, 'Окно редактирования')
+            self.note.note_with_container(self.cont, 'Окно редактирования', (.9, .6))
 
     def change_record(self, changes_func, *args):
         collection = [child.text for child in self.cont[0].children if isinstance(child, MDTextField)]

@@ -1,5 +1,6 @@
 from kivy.properties import ObjectProperty
 from kivy.uix.image import Image
+from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.screen import MDScreen
 
 from DbOperator import DbOperator
@@ -45,10 +46,10 @@ class Courier(MDScreen):
         self.load_data()
 
     def info(self):
-        im = Image(source='pictures/map.jpg')
-        im.allow_stretch = True
-        im.size_hint_x = None
-        im.size_hint_y = None
-        im.height = 800
-        im.width = 1400
-        self.note.note_with_container([im], "")
+        cont = MDBoxLayout(
+                height='700dp',
+                orientation='vertical',
+                size_hint_y=None)
+        im = Image(source='pictures/map2.jpg')
+        cont.add_widget(im)
+        self.note.note_with_container([cont], "", (700 / 1920, 500, 1080))
