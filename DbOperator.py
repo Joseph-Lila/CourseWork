@@ -33,8 +33,6 @@ class DbOperator(AnyBDInterface):
     def __get_outcomes_value(results, ans_type):
         if DbOperator().__check_equal(results):
             return results[-1]
-        if ans_type == 'None':
-            return None
         if ans_type == 'str':
             return ''
         if ans_type == 'bool':
@@ -51,44 +49,40 @@ class DbOperator(AnyBDInterface):
             return set()
         return None
 
-    def check_exists_user_with_login(self, login: str) -> bool:
+    def check_exists_user_with_login(self, login) -> bool:
         results = [item.check_exists_user_with_login(login) for item in self.representatives_collection]
         return self.__get_outcomes_value(results, 'bool')
 
-    def check_exists_city_with_title(self, title: str) -> bool:
+    def check_exists_city_with_title(self, title) -> bool:
         results = [item.check_exists_city_with_title(title) for item in self.representatives_collection]
-        return self.__get_outcomes_value(results, 'bool')
+        return self.__get_outcomes_value(results, bool)
 
-    def get_customer_id_with_user_id(self, user_id: list) -> tuple:
-        return tuple(item.get_customer_id_with_user_id(user_id[i])
-                     for i, item in enumerate(self.representatives_collection, start=0))
+    def get_customer_id_with_user_id(self, user_id) -> int:
+        results = [item.get_customer_id_with_user_id(user_id) for item in self.representatives_collection]
+        return self.__get_outcomes_value(results, 'int')
 
-    def get_role_id_with_role_title(self, title: list) -> tuple:
-        return tuple(item.get_role_id_with_role_title(title[i])
-                     for i, item in enumerate(self.representatives_collection, start=0))
+    def get_role_id_with_role_title(self, title) -> int:
+        results = [item.get_role_id_with_role_title(title) for item in self.representatives_collection]
+        return self.__get_outcomes_value(results, 'int')
 
-    def sign_up_transaction(self, sign_up_tuple: list) -> bool:
-        results = tuple(item.sign_up_transaction(sign_up_tuple[i])
-                        for i, item in enumerate(self.representatives_collection, start=0))
+    def sign_up_transaction(self, sign_up_tuple) -> bool:
+        results = [item.sign_up_transaction(sign_up_tuple) for item in self.representatives_collection]
         return self.__check_true_collection(results)
 
-    def get_user_id_with_login_and_password(self, login: list, password: list) -> tuple:
-        login = self.__get_outcomes_value(login, 'str')
-        password = self.__get_outcomes_value(password, 'str')
-        return tuple(item.get_user_id_with_login_and_password(login, password)
-                     for item in self.representatives_collection)
+    def get_user_id_with_login_and_password(self, login, password) -> int:
+        results = [item.get_user_id_with_login_and_password(login, password)
+                   for item in self.representatives_collection]
+        return self.__get_outcomes_value(results, 'int')
 
-    def get_user_roles_with_users_id(self, users_id: list) -> tuple:
-        result = tuple(item.get_user_roles_with_users_id(users_id[i])
-                       for i, item in enumerate(self.representatives_collection, start=0))
-        return self.__get_outcomes_value(result, 'tuple')
+    def get_user_roles_with_users_id(self, users_id) -> tuple:
+        results = [item.get_user_roles_with_users_id(users_id) for item in self.representatives_collection]
+        return self.__get_outcomes_value(results, 'tuple')
 
-    def when_shall_i_be_free(self, user_id: list) -> bool:
-        results = [item.when_shall_i_be_free(user_id[i])
-                   for i, item in enumerate(self.representatives_collection, start=0)]
+    def when_shall_i_be_free(self, user_id) -> bool:
+        results = [item.when_shall_i_be_free(user_id) for item in self.representatives_collection]
         return self.__check_true_collection(results)
 
-    def get_stage_id_with_stage_title(self, stage_title: str) -> int:
+    def get_stage_id_with_stage_title(self, stage_title) -> int:
         results = [item.get_stage_id_with_stage_title(stage_title) for item in self.representatives_collection]
         return self.__get_outcomes_value(results, 'int')
 
