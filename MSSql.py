@@ -115,11 +115,11 @@ class MSSql(AnyBDInterface):
     def sign_up_transaction(self, sign_up_tuple) -> bool:
         sql = f"""
 USE Coursework_MSSQL;
-        
+
 BEGIN TRANSACTION [SignUp]
-        
+
 BEGIN TRY
-        
+
 DECLARE @login varchar(50);
 DECLARE @password varchar(50);
 DECLARE @email varchar(50);
@@ -137,7 +137,7 @@ DECLARE @user_id INT;
 DECLARE @customer_id INT;
 DECLARE @customers_city INT;
 DECLARE @role_id iNT;
-        
+
 SET @login = '{sign_up_tuple.login}';
 SET @password= '{sign_up_tuple.password}';
 SET @email = '{sign_up_tuple.email}';
@@ -153,33 +153,33 @@ SET @city_title = '{sign_up_tuple.city_title}';
 SET @role_title = '{sign_up_tuple.role_title}';
 
 INSERT INTO users VALUES (@login, @password, @email, @phone_number);
-        
+
 SET @user_id = (SELECT [users_id]
                 FROM [dbo].[users]
                 WHERE [login] = @login);
-        
 
-        
+
+
 INSERT INTO customer VALUES (@user_id, @country, @street, @home_number, @flat_number, @lastname, @name, @middle_name);        
-        
+
 SET @customer_id = (SELECT [customer_id]
                     FROM [dbo].[customer]
                     WHERE [users_id] = @user_id);
-        
+
 SET @customers_city = (SELECT [city_id]
                     FROM [dbo].[city]
                     WHERE [title] = @city_title);
-        
+
 INSERT INTO customers_city VALUES (@customer_id, @customers_city);
-        
+
 SET @role_id = (SELECT [role_id]
                 FROM [dbo].[roles]
                 WHERE [title] = @role_title);
-        
+
 INSERT INTO users_role VALUES (@user_id, @role_id);
-        
+
 COMMIT TRANSACTION [SignUp]
-        
+
 END TRY
 BEGIN CATCH
 ROLLBACK TRANSACTION [SignUp]
@@ -193,53 +193,53 @@ END CATCH
                 USE Coursework_MSSQL;
 
                 BEGIN TRANSACTION [order_completed]
-                
+
                 BEGIN TRY
-                
+
                 DECLARE @order_id int;
                 DECLARE @now datetime;
                 DECLARE @user_id int;
                 DECLARE @courier_id int;
                 DECLARE @stage_id int;
                 DECLARE @status_id int;
-                
+
                 --set {user_id}
                 SET @user_id = 1;
-                
+
                 SET @courier_id = (SELECT employee_id
                                   FROM employee
                                   WHERE users_id = @user_id);
-                
+
                 SET @order_id = (SELECT my_order_id
                                 FROM my_order
                                 JOIN
                                 stage
                                 ON stage.stage_id = my_order.stage_id
                                 WHERE courier_id = @courier_id AND stage.title <> 'Выполнен');
-                
+
                 SET @now = GETDATE();
-                
+
                 SET @stage_id = (SELECT stage_id
                                 FROM stage
                                 WHERE title = 'Выполнен');
-                
+
                 UPDATE my_order
                     SET
                     executions = @now, stage_id = @stage_id
                     WHERE my_order_id = @order_id;
-                
+
                 SET @status_id = (SELECT status_id
                                  FROM statuses
                                  WHERE title = 'Свободен');
-                
+
                 UPDATE employee
                     SET
                     status_id = @status_id
                     WHERE
                     employee_id = @courier_id;
-                
+
                 COMMIT TRANSACTION [order_completed]
-                
+
                 END TRY
                 BEGIN CATCH
                 ROLLBACK TRANSACTION [order_completed]
@@ -253,43 +253,43 @@ END CATCH
                 USE Coursework_MSSQL;
 
                 BEGIN TRANSACTION [linking_transaction]
-                
+
                 BEGIN TRY
-                
+
                 DECLARE @order_id int;
                 DECLARE @now datetime;
                 DECLARE @courier_id int;
                 DECLARE @operator_id int;
                 DECLARE @stage_id int;
                 DECLARE @status_id int;
-                
+
                 SET @operator_id = {operator_id};
-                
+
                 SET @courier_id = {courier_id};
-                
+
                 SET @order_id = {order_id};
-                
+
                 SET @stage_id = (SELECT stage_id
                                 FROM stage
                                 WHERE title = 'Выполняется');
-                                
+
                 UPDATE my_order
                     SET 
                     courier_id = @courier_id, operator_id = @operator_id, stage_id = @stage_id
                     WHERE my_order_id = @order_id;
-                
+
                 SET @status_id = (SELECT status_id
                     FROM statuses
                     WHERE title = 'Занят');
-                
+
                 UPDATE employee
                     SET
                     status_id = @status_id
                     WHERE
                     users_id = @courier_id;
-                
+
                 COMMIT TRANSACTION [linking_transaction]
-                
+
                 END TRY
                 BEGIN CATCH
                 ROLLBACK TRANSACTION [linking_transaction]
@@ -303,44 +303,44 @@ END CATCH
                 USE Coursework_MSSQL;
 
                 BEGIN TRANSACTION [refusing_transaction]
-                
+
                 BEGIN TRY
-                
+
                 DECLARE @order_id int;
                 DECLARE @now datetime;
                 DECLARE @stage_id int;
-                
+
                 SET @order_id = {order_id};
-                
+
                 SET @stage_id = (SELECT stage_id
                                 FROM stage
                                 WHERE title = 'Отменен');
-                
+
                 SET @now = GETDATE()
-                
+
                 UPDATE my_order
                     SET
                     executions = @now, stage_id = @stage_id
                     WHERE my_order_id = @order_id;
-                
+
                 COMMIT TRANSACTION [refusing_transaction]
-                
+
                 END TRY
                 BEGIN CATCH
                 ROLLBACK TRANSACTION [refusing_transaction]
                 END CATCH        
                 """
         self.__execute(sql)
-        return self.check_orders_executions_and_stage_id_with_order_id(order_id)[1] == self\
+        return self.check_orders_executions_and_stage_id_with_order_id(order_id)[1] == self \
             .get_stage_id_with_stage_title('Отменен')
 
     def customer_order_transaction(self, customer_order_tuple) -> bool:
         date_time = datetime.today().strftime("%Y-%d-%m %H:%M:%S")
         sql = f"""
 USE Coursework_MSSQL;
-        
+
 BEGIN TRANSACTION [CustomerOrder]
-        
+
 BEGIN TRY
 
 DECLARE @stage_title varchar(50);
@@ -385,7 +385,7 @@ DECLARE @service_id int;
 DECLARE @orders_service_id int;
 DECLARE @begin_city_id int;
 DECLARE @end_city_id int;
-        
+
 SET @now = '{date_time}';
 SET @customer_id = (SELECT
                 customer_id
@@ -423,7 +423,7 @@ SET @orders_id = (SELECT
               AND operator_id IS NULL AND courier_id IS NULL AND stage_id = @stage_id
               AND status_id = @status_id
               );
-        
+
 SET @service_id = (SELECT
                service_id
                FROM services
@@ -471,7 +471,7 @@ INSERT INTO order_services_end_city(city_id, orders_service_id)
 VALUES (@end_city_id, @orders_service_id);
 
 COMMIT TRANSACTION [CustomerOrder]
-        
+
 END TRY
 BEGIN CATCH
 ROLLBACK TRANSACTION [CustomerOrder]
