@@ -40,7 +40,7 @@ class AnyBDInterface(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def customer_order_transaction(self, customer_order_tuple) -> bool:
+    def customer_order_transaction(self, orders_service_tuples) -> bool:
         pass
 
     @abc.abstractmethod

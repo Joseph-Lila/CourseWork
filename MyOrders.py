@@ -97,6 +97,7 @@ class MyOrders(MDScreen):
             btn2.bind(on_press=partial(self.refusing, str(collection[0])))
             if txt_field4.text == 'Оплачен':
                 btn2.disabled = True
+                btn1.disabled = True
             ans.append(btn1)
             ans.append(Widget())
             ans.append(btn2)

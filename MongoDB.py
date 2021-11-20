@@ -35,7 +35,7 @@ class MongoDB(AnyBDInterface):
     def when_shall_i_be_free(self, user_id) -> bool:
         pass
 
-    def customer_order_transaction(self, customer_order_tuple) -> bool:
+    def customer_order_transaction(self, orders_service_tuples) -> bool:
         pass
 
     def get_user_id_with_login_and_password(self, login, password) -> int:

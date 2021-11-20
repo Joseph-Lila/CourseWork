@@ -351,7 +351,120 @@ class MSSql(AnyBDInterface, DBContract):
         return self.check_orders_executions_and_stage_id_with_order_id(order_id)[1] == self \
             .get_stage_id_with_stage_title('Отменен')
 
-    def customer_order_transaction(self, customer_order_tuple) -> bool:
+    def orders_service_adding_transaction(self, orders_service_tuple, date_time) -> bool:
+        sql = f"""
+        USE Coursework_MSSQL;
+        
+        BEGIN TRANSACTION [orders_service]
+        
+        BEGIN TRY
+        
+        DECLARE @now datetime;
+        SET @now = '{date_time}';
+        
+        DECLARE @quantity_weight real;
+        SET @quantity_weight = {float(orders_service_tuple.weight.text)};
+        
+        DECLARE @quantity_radius real;
+        SET @quantity_radius = {float(orders_service_tuple.radius.text)};
+        
+        DECLARE @destinations_address varchar(100);
+        SET @destinations_address = '{orders_service_tuple.destination.text}';
+        
+        DECLARE @departures_address varchar(100);
+        SET @departures_address = '{orders_service_tuple.departure.text}';
+        
+        DECLARE @total_cost real;
+        SET @total_cost = {float(orders_service_tuple.total_cost.text)};
+        
+        
+        DECLARE @stage_title varchar(50);
+        SET @stage_title = 'На рассмотрении';
+        
+        DECLARE @status_title varchar(50);
+        SET @status_title = 'Не оплачен';
+        
+        DECLARE @user_id int;
+        SET @user_id = {User.user_id};
+        
+        DECLARE @customer_id int;
+        SET @customer_id = (SELECT
+                        customer_id
+                        FROM
+                        customer
+                        WHERE
+                        users_id = @user_id
+                        );
+        
+        DECLARE @begin_city_id int;
+        SET @begin_city_id = (SELECT
+                          city_id
+                          FROM
+                          city
+                          WHERE
+                          title = '{orders_service_tuple.begin_city.text}'
+                          );
+                          
+        DECLARE @end_city_id int;
+        SET @end_city_id = (SELECT
+                          city_id
+                          FROM
+                          city
+                          WHERE
+                          title = '{orders_service_tuple.end_city.text}'
+                          );
+                          
+        DECLARE @service_id int;
+        SET @service_id = (SELECT
+                       service_id
+                       FROM services
+                       WHERE title = '{orders_service_tuple.title}'
+                       );
+        
+        DECLARE @stage_id int;
+        SET @stage_id = (SELECT
+                     stage_id
+                     FROM 
+                     stage
+                     WHERE
+                     title = @stage_title
+                     );
+        
+        DECLARE @status_id int;
+        SET @status_id = (SELECT
+                      status_id
+                      FROM
+                      statuses
+                      WHERE
+                      title = @status_title
+                      );
+        
+        DECLARE @orders_id int;
+        SET @orders_id = (SELECT
+                      my_order_id
+                      FROM
+                      my_order
+                      WHERE
+                      commissions = @now AND executions IS NULL AND customer_id = @customer_id
+                      AND operator_id IS NULL AND courier_id IS NULL AND stage_id = @stage_id
+                      AND status_id = @status_id
+                      );
+        
+        INSERT INTO orders_service (service_id, my_order_id, quantity_weight, 
+        quantity_radius, destinations_address, departures_address, total_cost, begin_city_id, end_city_id)
+        VALUES (@service_id, @orders_id, @quantity_weight, @quantity_radius,
+        @destinations_address, @departures_address, @total_cost, @begin_city_id, @end_city_id);
+        
+        COMMIT TRANSACTION [orders_service]
+        
+        END TRY
+        BEGIN CATCH
+        ROLLBACK TRANSACTION [orders_service]
+        END CATCH 
+        """
+        return self._execute_(sql)
+
+    def customer_order_transaction(self, orders_service_tuples) -> bool:
         date_time = datetime.today().strftime("%Y-%d-%m %H:%M:%S")
         sql = f"""
         USE Coursework_MSSQL;
@@ -366,30 +479,6 @@ class MSSql(AnyBDInterface, DBContract):
         DECLARE @status_title varchar(50);
         SET @status_title = 'Не оплачен';
         
-        DECLARE @services_title varchar(50);
-        SET @services_title = '{customer_order_tuple.title}';
-        
-        DECLARE @quantity_weight float;
-        SET @quantity_weight = {customer_order_tuple.weight.text};
-        
-        DECLARE @quantity_radius float;
-        SET @quantity_radius = {customer_order_tuple.radius.text};
-        
-        DECLARE @destinations_address varchar(50);
-        SET @destinations_address = '{customer_order_tuple.destination.text}';
-        
-        DECLARE @departures_address varchar(50);
-        SET @departures_address = '{customer_order_tuple.departure.text}';
-        
-        DECLARE @total_cost float;
-        SET @total_cost = {customer_order_tuple.total_cost.text};
-        
-        DECLARE @begin_city_title varchar(50);
-        SET @begin_city_title = '{customer_order_tuple.begin_city.text}';
-        
-        DECLARE @end_city_title varchar(50);
-        SET @end_city_title = '{customer_order_tuple.end_city.text}';
-        
         DECLARE @user_id int;
         SET @user_id = {User.user_id};
         
@@ -397,11 +486,6 @@ class MSSql(AnyBDInterface, DBContract):
         DECLARE @customer_id int;
         DECLARE @stage_id int;
         DECLARE @status_id int;
-        DECLARE @orders_id int;
-        DECLARE @service_id int;
-        DECLARE @orders_service_id int;
-        DECLARE @begin_city_id int;
-        DECLARE @end_city_id int;
         
         SET @now = '{date_time}';
         SET @customer_id = (SELECT
@@ -431,62 +515,6 @@ class MSSql(AnyBDInterface, DBContract):
         INSERT INTO my_order (commissions, customer_id, stage_id, status_id) 
         VALUES (@now, @customer_id, @stage_id, @status_id);
         
-        SET @orders_id = (SELECT
-                      my_order_id
-                      FROM
-                      my_order
-                      WHERE
-                      commissions = @now AND executions IS NULL AND customer_id = @customer_id
-                      AND operator_id IS NULL AND courier_id IS NULL AND stage_id = @stage_id
-                      AND status_id = @status_id
-                      );
-        
-        SET @service_id = (SELECT
-                       service_id
-                       FROM services
-                       WHERE title = @services_title
-                       );
-        
-        INSERT INTO orders_service (service_id, my_order_id, quantity_weight, 
-        quantity_radius, destinations_address, departures_address, total_cost)
-        VALUES (@service_id, @orders_id, @quantity_weight, @quantity_radius,
-        @destinations_address, @departures_address, @total_cost);
-        
-        SET @orders_service_id = (SELECT
-                              orders_service_id
-                              FROM
-                              orders_service
-                              WHERE
-                              service_id = @service_id AND my_order_id = @orders_id
-                              AND quantity_weight = @quantity_weight
-                              AND quantity_radius = @quantity_radius
-                              AND destinations_address = @destinations_address
-                              AND departures_address = @departures_address
-                              AND total_cost = @total_cost
-                              );
-        
-        SET @begin_city_id = (SELECT
-                          city_id
-                          FROM
-                          city
-                          WHERE
-                          title = @begin_city_title
-                          );
-        
-        SET @end_city_id = (SELECT
-                          city_id
-                          FROM
-                          city
-                          WHERE
-                          title = @end_city_title
-                          );
-        
-        INSERT INTO order_services_begin_city(city_id, orders_service_id)
-        VALUES (@begin_city_id, @orders_service_id);
-        
-        INSERT INTO order_services_end_city(city_id, orders_service_id)
-        VALUES (@end_city_id, @orders_service_id);
-        
         COMMIT TRANSACTION [CustomerOrder]
         
         END TRY
@@ -495,6 +523,8 @@ class MSSql(AnyBDInterface, DBContract):
         END CATCH
         """
         self._execute_(sql)
+        for item in orders_service_tuples:
+            self.orders_service_adding_transaction(item, date_time)
         return self.check_exists_order_with_commissions_and_customer_id(date_time,
                                                                         self.get_customer_id_with_user_id(User.user_id)
                                                                         )
@@ -573,11 +603,8 @@ class MSSql(AnyBDInterface, DBContract):
                                 """
                                 city
                                 JOIN 
-                                order_services_begin_city
-                                ON city.city_id = order_services_begin_city.city_id
-                                JOIN 
                                 orders_service
-                                ON order_services_begin_city.orders_service_id = orders_service.orders_service_id
+                                ON city.city_id = orders_service.begin_city_id
                                 GROUP BY city.title
                                 """,
                                 "1 = 1"

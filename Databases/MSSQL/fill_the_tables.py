@@ -18,9 +18,7 @@ tables = [
     ("transport", 2, "csv/transport.csv"),
     ("my_order", 7, "csv/my_order.csv"),
     ("orders_transport", 2, "csv/orders_transport.csv"),
-    ("orders_service", 7, "csv/orders_service.csv"),
-    ("order_services_begin_city", 2, "csv/order_services_begin_city.csv"),
-    ("order_services_end_city", 2, "csv/order_services_end_city.csv"),
+    ("orders_service", 9, "csv/orders_service.csv")
 ]
 
 

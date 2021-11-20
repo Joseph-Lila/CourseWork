@@ -151,8 +151,9 @@ class DbOperator(AnyBDInterface):
                    for item in self.representatives_collection]
         return self.__check_true_collection(results)
 
-    def customer_order_transaction(self, customer_order_tuple) -> bool:
-        results = [item.customer_order_transaction(customer_order_tuple) for item in self.representatives_collection]
+    def customer_order_transaction(self, orders_service_tuples) -> bool:
+        results = [item.customer_order_transaction(orders_service_tuples)
+                   for item in self.representatives_collection]
         return self.__check_true_collection(results)
 
     def order_completed_transaction(self, user_id) -> bool:

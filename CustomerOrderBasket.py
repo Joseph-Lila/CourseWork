@@ -1,13 +1,18 @@
 from kivy.properties import ObjectProperty
 from kivymd.uix.screen import MDScreen
+
+from DbOperator import DbOperator
 from ListItemWithCheckbox import ListItemWithCheckbox
 from RightCheckbox import RightCheckbox
+from Notification import Notification
 
 basket = []
 
 
 class CustomerOrderBasket(MDScreen):
     container = ObjectProperty(None)
+    dialog = None
+    note = Notification(dialog)
 
     def __init__(self, **kw):
         super().__init__(**kw)
@@ -43,10 +48,9 @@ class CustomerOrderBasket(MDScreen):
             self.container.add_widget(ListItemWithCheckbox(text=cur_text))
 
     def pay_and_register_service_in_order(self, *args):
-        for item in basket:
-            for it in item:
-                if hasattr(it, 'text'):
-                    print(it.text, end='; ')
-                else:
-                    print(it, end='; ')
-            print()
+        if DbOperator().customer_order_transaction(basket):
+            self.note.universal_note("Заказ зарегистрирован!", [])
+        else:
+            self.note.universal_note("Заказ не удалось зарегистрировать!", [])
+        self.go_back()
+
