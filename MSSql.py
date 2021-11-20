@@ -711,10 +711,8 @@ class MSSql(AnyBDInterface, DBContract):
                                 JOIN
                                 statuses
                                 ON statuses.status_id = employee.status_id
-                                WHERE
-                                roles.title = 'Курьер' AND statuses.title = 'Свободен'
                                 """,
-                                "1 = 1"
+                                "roles.title = 'Курьер' AND statuses.title = 'Свободен'"
                                 )
         if len(results) == 0:
             return tuple()
@@ -730,10 +728,8 @@ class MSSql(AnyBDInterface, DBContract):
                                 JOIN
                                 statuses
                                 ON statuses.status_id = my_order.status_id
-                                WHERE
-                                stage.title = 'На рассмотрении' AND statuses.title = 'Оплачен'
                                 """,
-                                "1 = 1"
+                                "stage.title = 'На рассмотрении' AND statuses.title = 'Оплачен'"
                                 )
         if len(results) == 0:
             return tuple()
