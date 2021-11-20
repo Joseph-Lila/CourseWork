@@ -15,7 +15,7 @@
             title: "SERVICES LIST"
             md_bg_color: [200/255, 35/255, 100/255, 255/255]
             elevation: 30
-            right_action_items: [["arrow-left", lambda x: self.parent.parent.go_back()], ["minus", lambda x: self.parent.parent.remove_gui_items()], ["plus", lambda x: self.parent.parent.add_items()], ]
+            right_action_items: [["basket-off", lambda x: self.parent.parent.go_back()], ["basket-minus", lambda x: self.parent.parent.remove_gui_items()], ["basket-plus", lambda x: self.parent.parent.add_items()], ["credit-card-outline", lambda x: self.parent.parent.pay_and_register_service_in_order()]]
 
         BoxLayout:
 

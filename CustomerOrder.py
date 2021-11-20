@@ -130,8 +130,12 @@ class CustomerOrder(MDScreen):
                                      )
         btn1.bind(on_press=partial(self.__calculator, [title, weight_field, radius_field, total_cost_field]))
         btn1.bind(on_release=partial(self.processing, order_creator))
+        btn1.bind(on_press=self.disable_btn)
         return [txt_field1, grid1, departure_field, grid2, destination_field,
                 weight_field, radius_field, total_cost_field, Widget(), btn1]
+
+    def disable_btn(self, btn, *args):
+        btn.disabled = True
 
     def __button(self):
         btn = MDFillRoundFlatButton()
