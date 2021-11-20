@@ -91,6 +91,7 @@ class MyOrders(MDScreen):
         if add_buttons:
             btn1 = self.__button()
             btn1.bind(on_press=partial(self.processing, str(collection[0])))
+            btn1.bind(on_release=self.disable_btn)
             btn2 = self.__button()
             btn2.text = 'Отменить заказ'
             btn2.bind(on_press=partial(self.refusing, str(collection[0])))
@@ -100,6 +101,9 @@ class MyOrders(MDScreen):
             ans.append(Widget())
             ans.append(btn2)
         return ans
+
+    def disable_btn(self, btn, *args):
+        btn.disabled = True
 
     def load_data(self, *args):
         if not DbOperator().try_connection():

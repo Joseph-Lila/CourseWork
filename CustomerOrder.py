@@ -10,12 +10,12 @@ from kivymd.uix.screen import MDScreen
 from functools import partial
 from kivymd.uix.textfield import MDTextField
 
+from CustomerOrderBasket import basket
 from DbOperator import DbOperator
 from Notification import Notification
 from kivy.uix.button import Button
 
 from collections import namedtuple
-from RightCheckbox import RightCheckbox
 
 
 class CustomerOrder(MDScreen):
@@ -54,7 +54,7 @@ class CustomerOrder(MDScreen):
                 if value == '':
                     self.note.universal_note('Заполните все поля!', [])
                     return
-        RightCheckbox.my_collection.append(order_creator)
+        basket.append(order_creator)
         # self.note.universal_note('Услуга успешно добавлена!', [])
 
 
@@ -85,9 +85,13 @@ class CustomerOrder(MDScreen):
         departure_field = self.__txt_field('Адрес отправления')
         destination_field = self.__txt_field('Адрес назначения')
         weight_field = self.__txt_field('Вес (кг)')
+        weight_field.input_filter = 'float'
         weight_field.text = '0'
+        weight_field.text_validate_unfocus = False
         radius_field = self.__txt_field('Расстояние (км)')
+        radius_field.input_filter = 'float'
         radius_field.text = '0'
+        radius_field.text_validate_unfocus = False
         total_cost_field = self.__txt_field('Итоговая стоимость')
         total_cost_field.disabled = True
         weight_field.bind(on_text_validate=partial(self.__calculator, [title, weight_field, radius_field, total_cost_field]))
@@ -124,12 +128,12 @@ class CustomerOrder(MDScreen):
                                      weight=weight_field, radius=radius_field,
                                      total_cost=total_cost_field, title=title
                                      )
-        btn1.bind(on_press=partial(self.processing, order_creator))
+        btn1.bind(on_press=partial(self.__calculator, [title, weight_field, radius_field, total_cost_field]))
+        btn1.bind(on_release=partial(self.processing, order_creator))
         return [txt_field1, grid1, departure_field, grid2, destination_field,
                 weight_field, radius_field, total_cost_field, Widget(), btn1]
 
-    @staticmethod
-    def __button():
+    def __button(self):
         btn = MDFillRoundFlatButton()
         btn.pos_hint = {'center': .5}
         btn.font_size = 15
@@ -189,4 +193,4 @@ class CustomerOrder(MDScreen):
                                               font_size='30sp',
                                               on_press=partial(self.ordering, item)
                                               )
-                                        )
+                                 )
