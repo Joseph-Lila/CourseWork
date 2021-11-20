@@ -20,8 +20,9 @@ class CustomerOrderBasket(MDScreen):
         self.manager.current = 'customer'
 
     def remove_gui_items(self):
-        for item in RightCheckbox.my_collection:
+        for i, item in enumerate(RightCheckbox.my_collection, start=0):
             if item in self.container.children[:]:
+                del(basket[i])
                 self.container.remove_widget(item)
         RightCheckbox.my_collection.clear()
 

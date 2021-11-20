@@ -2,8 +2,8 @@ from kivy.config import Config
 
 Config.set('kivy', 'keyboard_mode', 'systemanddock')
 Config.set('graphics', 'resizable', False)
-Config.set("graphics", "width", 960)
-Config.set("graphics", "height", 1017)
+Config.set("graphics", "width", 480)
+Config.set("graphics", "height", 850)
 
 from kivymd.app import MDApp
 from kivy.uix.screenmanager import ScreenManager, FallOutTransition
