@@ -61,13 +61,13 @@ class DbOperator(AnyBDInterface):
         results = [item.get_customer_id_with_user_id(user_id) for item in self.representatives_collection]
         return self.__get_outcomes_value(results, 'int')
 
-    def get_role_id_with_role_title(self, title) -> int:
-        results = [item.get_role_id_with_role_title(title) for item in self.representatives_collection]
-        return self.__get_outcomes_value(results, 'int')
-
     def sign_up_transaction(self, sign_up_tuple) -> bool:
         results = [item.sign_up_transaction(sign_up_tuple) for item in self.representatives_collection]
         return self.__check_true_collection(results)
+
+    def is_user_plays_the_role(self, role_title, user_id) -> bool:
+        results = [item.is_user_plays_the_role(role_title, user_id) for item in self.representatives_collection]
+        return self.__get_outcomes_value(results, 'bool')
 
     def get_user_id_with_login_and_password(self, login, password) -> int:
         results = [item.get_user_id_with_login_and_password(login, password)

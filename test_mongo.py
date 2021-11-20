@@ -2,6 +2,7 @@ import pymongo
 import json
 from pandas import DataFrame
 import datetime
+from bson.objectid import ObjectId
 
 CONNECTION_STRING = 'mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&directConnection=true&ssl=false'
 DATABASE = 'coursework'
@@ -9,7 +10,7 @@ DATABASE = 'coursework'
 
 myclient = pymongo.MongoClient(CONNECTION_STRING)
 mydb = myclient[DATABASE]
-mycol = mydb["service"]
+mycol = mydb["my_order"]
 
 # mycol.drop()
 # with open('Databases/MongoDB/configs/my_order.json') as f:
@@ -104,7 +105,7 @@ data = {
     "cost_weight": 5,
     "cost_radius": 10
 }
-mycol.insert_one(data)
+# mycol.insert_one(data)
 
-for x in mycol.find():
+for x in mycol.find({}):
     print(x)

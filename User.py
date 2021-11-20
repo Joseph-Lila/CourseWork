@@ -1,3 +1,3 @@
 class User:
-    user_id = None
-    current_role_id = None
+    user_id = []
+    current_role = []

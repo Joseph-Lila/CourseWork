@@ -15,6 +15,7 @@ from Notification import Notification
 from kivy.uix.button import Button
 
 from collections import namedtuple
+from RightCheckbox import RightCheckbox
 
 
 class CustomerOrder(MDScreen):
@@ -53,10 +54,9 @@ class CustomerOrder(MDScreen):
                 if value == '':
                     self.note.universal_note('Заполните все поля!', [])
                     return
-        if DbOperator().customer_order_transaction(order_creator):
-            self.note.universal_note('Операция прошла успешно!', [])
-        else:
-            self.note.universal_note('Ошибка добавления.', [])
+        RightCheckbox.my_collection.append(order_creator)
+        # self.note.universal_note('Услуга успешно добавлена!', [])
+
 
     @staticmethod
     def __is_number(value):
@@ -136,7 +136,7 @@ class CustomerOrder(MDScreen):
         btn.md_bg_color = [40 / 255, 40 / 255, 180 / 255, 100 / 255]
         btn.text_color = [1, 1, 1, 1]
         btn.size_hint_x = None
-        btn.text = 'Подтвердить заказ'
+        btn.text = 'Подтвердить заказ и добавить в корзину.'
         return btn
 
     @staticmethod

@@ -94,9 +94,8 @@ class ChooseRole(MDScreen):
         return button
 
     def __role(self, title_rus, title_en, *args):
-        role_id = DbOperator().get_role_id_with_role_title(title_rus)
-        if role_id == -1:
+        if not DbOperator().is_user_plays_the_role(role_title=title_rus, user_id=User.user_id):
             self.note.universal_note('Произошло обезличивание!', [])
         else:
-            User.current_role_id = role_id
+            User.current_role = title_rus
         self.manager.current = title_en

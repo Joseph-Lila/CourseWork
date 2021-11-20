@@ -8,7 +8,7 @@ class AnyBDInterface(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def get_role_id_with_role_title(self, title) -> tuple:
+    def is_user_plays_the_role(self, role_title, user_id) -> bool:
         pass
 
     @abc.abstractmethod

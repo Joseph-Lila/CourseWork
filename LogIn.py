@@ -38,17 +38,12 @@ class LogIn(MDScreen):
         self.dialog.dismiss(force=True)
 
     # User is free to have few roles, so, here program's mechanism suggest what to do.
-    # If user has only one role (CUSTOMER), he immediately get customer's screen,
+    # If user has only one role (CUSTOMER), he immediately gets customer's screen,
     # otherwise he get a choice.
 
     def __choose_role(self, user_roles):
         if len(user_roles) == 1:
-            role_id = DbOperator().get_role_id_with_role_title('Клиент')
-            if role_id == -1:
-                self.note.universal_note('Произошло обезличивание!', [])
-            else:
-                User.current_role_id = role_id
-                self.__refresh_fields()
+            self.__refresh_fields()
             self.manager.current = 'customer'
         else:
             for item in user_roles:

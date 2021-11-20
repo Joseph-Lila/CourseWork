@@ -29,7 +29,7 @@
 
         size_hint: (1, .05)
         valign: 'top'
-        cols: 2
+        cols: 3
         rows: None
         spacing: 10
 
@@ -41,6 +41,15 @@
                 icon: 'arrow-left'
                 md_bg_color: [249 / 255, 166 / 255, 2 / 255, 255 / 255]
                 on_press: root.manager.current = 'customer'
+
+        AnchorLayout:
+
+            MDIconButton :
+                user_font_size: "20sp"
+                icon_color: [1, 1, 1, 1]
+                icon: 'basket'
+                md_bg_color: [249 / 255, 166 / 255, 2 / 255, 255 / 255]
+                on_press: root.manager.current = 'basket'
 
         AnchorLayout:
 

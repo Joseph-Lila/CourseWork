@@ -14,9 +14,6 @@ class MongoDB(AnyBDInterface):
     def try_connection(self) -> bool:
         pass
 
-    def get_role_id_with_role_title(self, title) -> int:
-        pass
-
     def check_exists_user_with_login(self, login) -> bool:
         pass
 
@@ -42,7 +39,8 @@ class MongoDB(AnyBDInterface):
         pass
 
     def get_user_id_with_login_and_password(self, login, password) -> int:
-        pass
+        results = 1
+        return results
 
     def get_user_roles_with_users_id(self, users_id) -> tuple:
         pass

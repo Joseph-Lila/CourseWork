@@ -1,5 +1,11 @@
-from kivymd.app import MDApp
 from kivy.config import Config
+
+Config.set('kivy', 'keyboard_mode', 'systemanddock')
+Config.set('graphics', 'resizable', False)
+Config.set("graphics", "width", 960)
+Config.set("graphics", "height", 1017)
+
+from kivymd.app import MDApp
 from kivy.uix.screenmanager import ScreenManager, FallOutTransition
 from kivy.lang import Builder
 
@@ -14,14 +20,13 @@ from SignUp import *
 from GetPassword import *
 from Operator import Operator
 from Courier import Courier
-from kivy.core.window import Window
 from MyOrders import MyOrders
+from CustomerOrderBasket import CustomerOrderBasket
+from RightCheckbox import RightCheckbox
+
 
 import MSSql, DB_Recorder
 
-Config.set('kivy', 'keyboard_mode', 'systemanddock')
-keyboard_mode = '3'
-Window.size = (480, 853)
 
 Builder.load_file('kv-files/My.kv')
 Builder.load_file('kv-files/LogIn.kv')
@@ -35,6 +40,7 @@ Builder.load_file('kv-files/HandBooks.kv')
 Builder.load_file('kv-files/CustomerOrder.kv')
 Builder.load_file('kv-files/Reports.kv')
 Builder.load_file('kv-files/MyOrders.kv')
+Builder.load_file('kv-files/CustomerOrderBasket.kv')
 
 
 class Myapp(MDApp):
@@ -54,6 +60,7 @@ class Myapp(MDApp):
         sm.add_widget(Reports(name='reports'))
         sm.add_widget(CustomerOrder(name='customer_order'))
         sm.add_widget(MyOrders(name='my_orders'))
+        sm.add_widget(CustomerOrderBasket(name='basket'))
         return sm
 
 
