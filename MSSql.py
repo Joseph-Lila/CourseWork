@@ -775,7 +775,8 @@ class MSSql(AnyBDInterface, DBContract):
         description = '{data[2]}',
         address = '{data[3]}',
         square = {float(data[4])},
-        stars_quantity = {int(data[5])}
+        stars_quantity = {int(data[5])},
+        city_id = {int(data[6])}
         WHERE
         fleet_id = {int(data[0])}
         """
