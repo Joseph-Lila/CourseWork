@@ -583,9 +583,8 @@ class MSSql(AnyBDInterface, DBContract):
                                 JOIN 
                                 orders_service
                                 ON services.service_id = orders_service.service_id
-                                GROUP BY services.title
                                 """,
-                                "1 = 1"
+                                "1 = 1 GROUP BY services.title"
                                 )
         if len(results) == 0:
             return tuple()
@@ -593,7 +592,7 @@ class MSSql(AnyBDInterface, DBContract):
 
     def get_months_quantity_orders(self) -> tuple:
         results = self._select_("DATENAME(M, MONTH(commissions)) as months, COUNT(my_order_id) as quantity",
-                                "my_order GROUP BY DATENAME(M, MONTH(commissions))", "1 = 1")
+                                "my_order ", "1 = 1 GROUP BY DATENAME(M, MONTH(commissions))")
         if len(results) == 0:
             return tuple()
         return tuple(results)
@@ -605,9 +604,8 @@ class MSSql(AnyBDInterface, DBContract):
                                 JOIN 
                                 orders_service
                                 ON city.city_id = orders_service.begin_city_id
-                                GROUP BY city.title
                                 """,
-                                "1 = 1"
+                                "1 = 1 GROUP BY city.title"
                                 )
         if len(results) == 0:
             return tuple()

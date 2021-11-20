@@ -17,6 +17,9 @@ class Reports(MDScreen):
     def on_enter(self, *args):
         self.load_data()
 
+    def go_back(self, *args):
+        self.manager.current = 'director'
+
     def fill_services_pie(self):
         self.__get_pie(DbOperator().get_services_titles_and_total_costs, "Доходы по услугам (%)")
         self.services_pie.add_widget(Image(source='pictures/pieДоходы по услугам (%).png'))
@@ -41,7 +44,7 @@ class Reports(MDScreen):
         xs = range(len(data_names))
         plt.pie(
             data_values, autopct='%.1f', radius=1.2,
-            explode=[0.15] + [0 for _ in range(len(data_names) - 1)])
+            explode=[0.15] + [0 for item in range(len(data_names) - 1)])
         plt.legend(
             bbox_to_anchor=(-0.16, 0.45, 0.25, 0.25),
             loc='lower left', labels=data_names)
