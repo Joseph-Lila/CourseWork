@@ -1,6 +1,6 @@
 [{
   "_id": {
-    "$oid": "61973f9a636a61cec81781b1"
+    "$oid": "6199f45580ba05e82a68879e"
   },
   "commissions": {
     "$date": "2021-05-01T14:25:10Z"
@@ -8,19 +8,30 @@
   "executions": {
     "$date": "2021-05-02T13:30:00Z"
   },
-  "stage_id": 1,
   "stage_title": "Выполняется",
   "stage_description": "Заказ в процессе выполнения.",
-  "orders_service_id": 1,
-  "orders_service_title": "Грузоперевозки",
-  "orders_service_description": "Квартирные и дачные переезды, офисные переезды, доставка мебели, строительных материалов, перевозка крупногабаритных грузов.",
-  "orders_service_cost_weight": 4,
-  "orders_service_cost_radius": 6,
-  "orders_service_quantity_weight": 10,
-  "orders_service_quantity_radius": 10,
-  "orders_service_total_cost": 100,
-  "destinations_address": "ADDRESS1",
-  "departures_address": "ADDRESS2",
-  "orders_service_begin_city": "Гомель",
-  "orders_service_end_city": "Гродно"
+  "customer_id": {
+    "$oid": "6199f45580ba05e82a68879d"
+  },
+  "operator_id": {
+    "$oid": "6199f45580ba05e82a68879d"
+  },
+  "courier_id": {
+    "$oid": "6199f45580ba05e82a68879d"
+  },
+  "orders_services": [
+    {
+      "service_id": {
+        "$oid": "6199f45580ba05e82a68879f"
+      },
+      "service_title": "Грузоперевозки",
+      "quantity_weight": 10,
+      "quantity_radius": 10,
+      "total_cost": 100,
+      "destination": "ADDRESS1",
+      "departure": "ADDRESS2",
+      "begin_city_id": 1,
+      "end_city_id": 6
+    }
+  ]
 }]
