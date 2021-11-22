@@ -1,8 +1,10 @@
 import pymongo
 import json
+import bson
 from pandas import DataFrame
-import datetime
+from datetime import *
 from bson.objectid import ObjectId
+from dateutil import parser
 
 CONNECTION_STRING = 'mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&directConnection=true&ssl=false'
 DATABASE = 'coursework'
@@ -42,4 +44,11 @@ def _insert_(database, insert_into_, what_, values_=None) -> bool:
         return False
 
 
-print(_insert_(mydb, "user", {"loki": "kali"}))
+result = _select_(
+            mydb,
+            {
+                "jokes.joke1": 1
+            },
+            "user",
+)
+print(result[0]["jokes"][0]["joke1"])

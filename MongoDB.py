@@ -1,4 +1,5 @@
-import datetime
+from datetime import *
+from dateutil import parser
 from User import User
 from pymongo import MongoClient
 from AnyBDInterface import AnyBDInterface
@@ -105,7 +106,7 @@ class MongoDB(AnyBDInterface, DBContract):
 
     def order_completed_transaction(self, user_id) -> bool:
         ans1 = self._update_("my_order",
-                             {"executions": datetime.datetime.now(),
+                             {"executions": parser.parse(datetime.now().strftime("%Y-%m-%d %H:%M:%S")),
                               "stage_title": "Выполнен",
                               "stage_description": "Заказ в процессе выполнения.",
                               },
@@ -126,16 +127,17 @@ class MongoDB(AnyBDInterface, DBContract):
         return ans1 and ans2
 
     def refusing_transaction(self, order_id) -> bool:
-        return self._update_("my_order",
-                             {
-                                 "stage_title": "Отменен",
-                                 "stage_description": "Заказ не был оплачен и был отменен клиентом.",
-                                 "executions": datetime.datetime.now()
-                             },
-                             {
-                                 "_id": order_id
-                             }
-                             )
+        return self._update_(
+            "my_order",
+            {
+                "stage_title": "Отменен",
+                "stage_description": "Заказ не был оплачен и был отменен клиентом.",
+                "executions": parser.parse(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+            },
+            {
+                "_id": order_id
+            }
+        )
 
     def when_shall_i_be_free(self, user_id) -> bool:
         results = self._select_({"_id": user_id, "status_title": "Свободен"}, "user")
@@ -144,19 +146,63 @@ class MongoDB(AnyBDInterface, DBContract):
         return True
 
     def customer_order_transaction(self, orders_service_tuples) -> bool:
-        date_time = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
-        return self._insert_("my_order",
-                             {
-                                 "commissions": date_time,
-                                 "executions": None,
-                                 "stage_title": "На рассмотрении",
-                                 "stage_description": "Заказ оплачен и должен быть поручен свободному курьеру.",
-                                 "customer_id": User.user_id,
-                                 "operator_id": None,
-                                 "courier_id": None,
-                                 "orders_services": []
-                             }
-                             )
+        date_time = parser.parse(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+        ans = self._insert_(
+            "my_order",
+            {
+                "commissions": date_time,
+                "executions": None,
+                "stage_title": "На рассмотрении",
+                "stage_description": "Заказ оплачен и должен быть поручен свободному курьеру.",
+                "customer_id": User.user_id,
+                "operator_id": None,
+                "courier_id": None,
+                "orders_services": [],
+                "status_title": "Не оплачен",
+                "status_description": "Заказ не оплачен и может быть отменен."
+            }
+        )
+        for item in orders_service_tuples:
+            self.orders_service_adding_transaction(item, date_time)
+        return ans
+
+    def get_current_orders_services(self, date_time) -> list:
+        results = self._select_(
+            {
+                "commissions": date_time
+            },
+            "handbooks"
+        )
+        ans = [item["orders_services"] for item in results]
+        return ans
+
+    def orders_service_adding_transaction(self, orders_service_tuple, date_time) -> bool:
+        current_orders_services = self.get_current_orders_services(date_time)
+        current_service = self.get_service_fields_with_title(orders_service_tuple.title)
+        current_begin_city_id = self.get_city_fields_with_title(orders_service_tuple.begin_city.text)[0]
+        current_end_city_id = self.get_city_fields_with_title(orders_service_tuple.end_city.text)[0]
+        current_orders_services.append(
+            {
+                "service_id": current_service[0],
+                "service_title": current_service[1],
+                "quantity_weight": float(orders_service_tuple.weight.text),
+                "quantity_radius": float(orders_service_tuple.radius.text),
+                "total_cost": float(orders_service_tuple.total_cost.text),
+                "destination": orders_service_tuple.destination.text,
+                "departure": orders_service_tuple.departure.text,
+                "begin_city_id": current_begin_city_id,
+                "end_city_id": current_end_city_id
+            }
+        )
+        return self._update_(
+            "my_order",
+            {
+                "orders_services": current_orders_services
+            },
+            {
+                "commissions": date_time
+            }
+        )
 
     def get_user_id_with_login_and_password(self, login, password) -> int:
         results = self._select_(
@@ -205,7 +251,6 @@ class MongoDB(AnyBDInterface, DBContract):
             },
             "my_order"
         )
-        print(results)
         ans = tuple(
             (
                 [item['_id'], item['commissions'], item['executions'], item['status_title'], item['stage_title']]
@@ -301,7 +346,6 @@ class MongoDB(AnyBDInterface, DBContract):
                 }
             ]
         )
-        print(results)
         if len(results) == 0:
             return tuple()
         return tuple(
@@ -326,7 +370,7 @@ class MongoDB(AnyBDInterface, DBContract):
         if len(results) == 0:
             return tuple()
         return tuple(
-            [datetime.datetime.date(1900, item["months"], 1).strftime('%B'), item['quantity']]
+            [datetime.date(1900, item["months"], 1).strftime('%B'), item['quantity']]
             for item in results
         )
 
@@ -356,10 +400,33 @@ class MongoDB(AnyBDInterface, DBContract):
         pass
 
     def get_city_fields_with_title(self, title) -> tuple:
-        pass
+        result = self._select_(
+            {},
+            "handbooks"
+        )
+        ans = [item for item in result if "city_title" in item.keys() and item["city_title"] == title]
+        if len(ans) == 0:
+            return tuple()
+        ans = tuple([ans[0]["_id"], ans[0]["city_title"]])
+        return ans
 
     def get_service_fields_with_title(self, title) -> tuple:
-        pass
+        result = self._select_(
+            {},
+            "handbooks"
+        )
+        ans = [item for item in result if "service_title" in item.keys() and item["service_title"] == title]
+        if len(ans) == 0:
+            return tuple()
+        ans = tuple([
+            ans[0]["_id"],
+            ans[0]["service_title"],
+            ans[0]["service_description"],
+            ans[0]["cost_weight"],
+            ans[0]["cost_radius"]
+        ]
+        )
+        return ans
 
     def get_kind_fields_with_title(self, title) -> tuple:
         pass
