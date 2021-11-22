@@ -27,7 +27,7 @@ class MyOrders(MDScreen):
     def fill_any_cont(self, cont, on_press_func, orders_func, add_buttons):
         cont[-1].clear_widgets()
         self.titles.clear()
-        customer_id = DbOperator().get_customer_id_with_user_id(User.user_id)
+        customer_id = User.user_id
         orders = orders_func(customer_id)
         for item in orders:
             self.titles.append(item[0])
@@ -52,10 +52,9 @@ class MyOrders(MDScreen):
         self.note.note_with_container(cont, "", (.9, .6))
 
     def processing(self, order_id, *args):
-        status_id = DbOperator().get_status_id_with_status_title('Оплачен')
-        if status_id == -1:
-            return
-        if not DbOperator().alter_orders_status_id_with_order_id(status_id, order_id):
+        status_title = 'Оплачен'
+        status_description = 'Заказ оплачен клиентом и отмена невозможна.'
+        if not DbOperator().alter_orders_status_with_order_id(status_title, order_id, status_description):
             return
         self.load_data()
 

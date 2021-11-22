@@ -22,7 +22,7 @@
   "orders_services": [
     {
       "service_id": {
-        "$oid": "6199f45580ba05e82a68879f"
+        "$oid": "6199fcd38c03c9f182655942"
       },
       "service_title": "Грузоперевозки",
       "quantity_weight": 10,
@@ -30,8 +30,14 @@
       "total_cost": 100,
       "destination": "ADDRESS1",
       "departure": "ADDRESS2",
-      "begin_city_id": 1,
-      "end_city_id": 6
+      "begin_city_id": {
+        "$oid": "619a04c2e10e5c904cc62dc3"
+      },
+      "end_city_id": {
+        "$oid": "619a0512a20b20cd1dd88b7c"
+      }
     }
-  ]
+  ],
+  "status_description": "Заказ оплачен клиентом и отмена невозможна.",
+  "status_title": "Оплачен"
 }]

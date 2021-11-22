@@ -7,7 +7,7 @@ class DBContract(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def _update_(self, update__, set_, where_) -> bool:
+    def _update_(self, update_, set_, where_) -> bool:
         pass
 
     @abc.abstractmethod

@@ -1,5 +1,5 @@
 from AnyBDInterface import AnyBDInterface
-import MSSql, DB_Recorder
+import MongoDB, DB_Recorder
 
 
 class DbOperator(AnyBDInterface):
@@ -57,10 +57,6 @@ class DbOperator(AnyBDInterface):
         results = [item.check_exists_city_with_title(title) for item in self.representatives_collection]
         return self.__get_outcomes_value(results, bool)
 
-    def get_customer_id_with_user_id(self, user_id) -> int:
-        results = [item.get_customer_id_with_user_id(user_id) for item in self.representatives_collection]
-        return self.__get_outcomes_value(results, 'int')
-
     def sign_up_transaction(self, sign_up_tuple) -> bool:
         results = [item.sign_up_transaction(sign_up_tuple) for item in self.representatives_collection]
         return self.__check_true_collection(results)
@@ -82,26 +78,9 @@ class DbOperator(AnyBDInterface):
         results = [item.when_shall_i_be_free(user_id) for item in self.representatives_collection]
         return self.__check_true_collection(results)
 
-    def get_stage_id_with_stage_title(self, stage_title) -> int:
-        results = [item.get_stage_id_with_stage_title(stage_title) for item in self.representatives_collection]
-        return self.__get_outcomes_value(results, 'int')
-
-    def get_status_id_with_status_title(self, status_title) -> int:
-        results = [item.get_status_id_with_status_title(status_title) for item in self.representatives_collection]
-        return self.__get_outcomes_value(results, 'int')
-
     def refusing_transaction(self, order_id) -> bool:
         results = [item.refusing_transaction(order_id) for item in self.representatives_collection]
         return self.__check_true_collection(results)
-
-    def check_orders_executions_and_stage_id_with_order_id(self, order_id) -> tuple:
-        results = [item.check_orders_executions_and_stage_id_with_order_id(order_id)
-                   for item in self.representatives_collection]
-        return self.__get_outcomes_value(results, 'tuple')
-
-    def check_orders_status_id_with_order_id(self, order_id) -> int:
-        results = [item.check_orders_status_id_with_order_id(order_id) for item in self.representatives_collection]
-        return self.__get_outcomes_value(results, 'int')
 
     def get_passive_orders_data_for_customer_with_customer_id(self, customer_id) -> tuple:
         results = [item.get_passive_orders_data_for_customer_with_customer_id(customer_id)
@@ -113,8 +92,8 @@ class DbOperator(AnyBDInterface):
                    for item in self.representatives_collection]
         return self.__get_outcomes_value(results, 'tuple')
 
-    def alter_orders_status_id_with_order_id(self, orders_status, order_id) -> bool:
-        results = [item.alter_orders_status_id_with_order_id(orders_status, order_id)
+    def alter_orders_status_with_order_id(self, orders_status, order_id, status_description) -> bool:
+        results = [item.alter_orders_status_with_order_id(orders_status, order_id, status_description)
                    for item in self.representatives_collection]
         return self.__check_true_collection(results)
 

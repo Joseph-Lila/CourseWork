@@ -22,10 +22,10 @@ from Operator import Operator
 from Courier import Courier
 from MyOrders import MyOrders
 from CustomerOrderBasket import CustomerOrderBasket
-from RightCheckbox import RightCheckbox
 
 
-import MSSql, DB_Recorder
+
+import MongoDB, DB_Recorder
 
 
 Builder.load_file('kv-files/My.kv')

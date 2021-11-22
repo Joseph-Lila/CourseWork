@@ -26,9 +26,7 @@ class MSSql(AnyBDInterface, DBContract):
             self.cursor = connector.cursor()
             select_str = f"SELECT {select_} FROM {from_} WHERE {where_}"
             self.cursor.execute(select_str)
-            ans = []
-            for item in self.cursor:
-                ans.append(item)
+            ans = [item for item in self.cursor]
             self.cursor.close()
             return ans
         except pyodbc.Error:
@@ -125,12 +123,6 @@ class MSSql(AnyBDInterface, DBContract):
         if len(results) == 0:
             return tuple()
         return results[0]
-
-    def get_customer_id_with_user_id(self, user_id) -> int:
-        results = self._select_("customer_id", "customer", f"users_id = {user_id}")
-        if len(results) == 0:
-            return -1
-        return results[0][0]
 
     def sign_up_transaction(self, sign_up_tuple) -> bool:
         sql = f"""
@@ -526,7 +518,7 @@ class MSSql(AnyBDInterface, DBContract):
         for item in orders_service_tuples:
             self.orders_service_adding_transaction(item, date_time)
         return self.check_exists_order_with_commissions_and_customer_id(date_time,
-                                                                        self.get_customer_id_with_user_id(User.user_id)
+                                                                        User.user_id
                                                                         )
 
     def get_services_costs_with_title(self, title) -> tuple:
@@ -536,7 +528,7 @@ class MSSql(AnyBDInterface, DBContract):
                                 )
         if len(results) == 0:
             return ()
-        return tuple([results[0][0], results[0][1]])
+        return results[0][0], results[0][1]
 
     def get_user_id_with_login_and_password(self, login, password) -> int:
         results = self._select_("users_id", "users", f"login = '{login}' AND password = '{password}'")
@@ -642,14 +634,13 @@ class MSSql(AnyBDInterface, DBContract):
             return -1
         return results[0][0]
 
-    def alter_orders_status_id_with_order_id(self, orders_status, order_id) -> bool:
+    def alter_orders_status_with_order_id(self, orders_status, order_id, status_description) -> bool:
         sql = f"""
         UPDATE my_order
-            SET status_id = {orders_status}
+            SET status_id = {self.get_status_id_with_status_title(orders_status)}
             WHERE my_order_id = {order_id}
         """
-        self._execute_(sql)
-        return orders_status == self.check_orders_status_id_with_order_id(order_id)
+        return self._execute_(sql)
 
     def get_passive_orders_data_for_customer_with_customer_id(self, customer_id) -> tuple:
         results = self._select_(
@@ -678,12 +669,6 @@ class MSSql(AnyBDInterface, DBContract):
         if len(results) == 0:
             return ()
         return tuple(results)
-
-    def check_orders_status_id_with_order_id(self, order_id) -> int:
-        results = self._select_("status_id", "my_order", f"my_order_id = {order_id}")
-        if len(results) == 0:
-            return -1
-        return results[0][0]
 
     def check_courier_id_not_null_with_order_id(self, order_id) -> bool:
         results = self._select_("courier_id", 'my_order', f"my_order_id = {order_id}")

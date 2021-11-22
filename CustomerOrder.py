@@ -188,7 +188,6 @@ class CustomerOrder(MDScreen):
         self.titles.clear()
         services = DbOperator().get_service_titles()
         if len(services) == 0:
-            self.cont.add_widget(MDLabel(text='Список пуст.'))
             return
         for item in services:
             self.titles.append(item)

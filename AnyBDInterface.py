@@ -20,12 +20,9 @@ class AnyBDInterface(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def get_customer_id_with_user_id(self, user_id) -> int:
-        pass
-
-    @abc.abstractmethod
     def sign_up_transaction(self, sign_up_tuple) -> bool:
         pass
+
 
     @abc.abstractmethod
     def order_completed_transaction(self, user_id) -> bool:
@@ -52,23 +49,7 @@ class AnyBDInterface(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def get_stage_id_with_stage_title(self, stage_title) -> int:
-        pass
-
-    @abc.abstractmethod
-    def get_status_id_with_status_title(self, status_title) -> int:
-        pass
-
-    @abc.abstractmethod
-    def alter_orders_status_id_with_order_id(self, orders_status, order_id) -> bool:
-        pass
-
-    @abc.abstractmethod
-    def check_orders_executions_and_stage_id_with_order_id(self, order_id) -> tuple:
-        pass
-
-    @abc.abstractmethod
-    def check_orders_status_id_with_order_id(self, order_id) -> int:
+    def alter_orders_status_with_order_id(self, status_title, order_id, status_description) -> bool:
         pass
 
     @abc.abstractmethod
