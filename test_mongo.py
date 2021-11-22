@@ -44,11 +44,15 @@ def _insert_(database, insert_into_, what_, values_=None) -> bool:
         return False
 
 
-result = _select_(
-            mydb,
+print(_update_(mydb,
+            "my_order",
             {
-                "jokes.joke1": 1
+                "executions": parser.parse(datetime.now().strftime("%Y-%m-%d %H:%M:%S")),
+                "stage_title": "Выполнен",
+                "stage_description": "Заказ в процессе выполнения.",
             },
-            "user",
-)
-print(result[0]["jokes"][0]["joke1"])
+            {
+                "courier_id": ObjectId("6199f45580ba05e82a68879d"),
+                "stage_title": "Выполняется"
+            }
+        ))

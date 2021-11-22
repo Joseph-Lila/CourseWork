@@ -5,6 +5,7 @@ from pymongo import MongoClient
 from AnyBDInterface import AnyBDInterface
 from DBContract import DBContract
 from DB_Recorder import db_recorder
+from bson.objectid import ObjectId
 
 
 @db_recorder
@@ -105,25 +106,29 @@ class MongoDB(AnyBDInterface, DBContract):
                              )
 
     def order_completed_transaction(self, user_id) -> bool:
-        ans1 = self._update_("my_order",
-                             {"executions": parser.parse(datetime.now().strftime("%Y-%m-%d %H:%M:%S")),
-                              "stage_title": "Выполнен",
-                              "stage_description": "Заказ в процессе выполнения.",
-                              },
-                             {
-                                 "courier_id": user_id,
-                                 "stage_title": {"$not": "Выполнен"}
-                             }
-                             )
-        ans2 = self._update_("user",
-                             {
-                                 "status_title": "Свободен",
-                                 "status_description": "Сотрудник доступен и ему можно поручить задание."
-                             },
-                             {
-                                 "_id": user_id
-                             }
-                             )
+        ans1 = self._update_(
+            "my_order",
+            {
+                "executions": parser.parse(datetime.now().strftime("%Y-%m-%d %H:%M:%S")),
+                "stage_title": "Выполнен",
+                "stage_description": "Заказ в процессе выполнения.",
+            },
+            {
+                "courier_id": ObjectId(user_id),
+                "stage_title": "Выполняется"
+            }
+        )
+        ans2 = self._update_(
+            "user",
+            {
+                "status_title": "Свободен",
+                "status_description": "Сотрудник доступен и ему можно поручить задание."
+            },
+            {
+                "_id": ObjectId(user_id)
+            }
+        )
+        print(ans1, ans2)
         return ans1 and ans2
 
     def refusing_transaction(self, order_id) -> bool:
@@ -135,7 +140,7 @@ class MongoDB(AnyBDInterface, DBContract):
                 "executions": parser.parse(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
             },
             {
-                "_id": order_id
+                "_id": ObjectId(order_id)
             }
         )
 
@@ -231,14 +236,24 @@ class MongoDB(AnyBDInterface, DBContract):
     def get_passive_orders_data_for_customer_with_customer_id(self, customer_id) -> tuple:
         results = self._select_(
             {
-                "stage_title": {"$not": ["На рассмотрении", "Выполняется"]},
-                "customer_id": customer_id
+                "$or": [{"stage_title": "На рассмотрении"}, {"stage_title": "Выполняется"}],
+                "customer_id": ObjectId(customer_id)
             },
             "my_order"
         )
-        ans = tuple([item['_id'], item['commissions'], item['executions'], item['status_title'], item['stage_title']]
-                    for item in results
-                    )
+        results2 = self._select_(
+            {
+                "customer_id": ObjectId(customer_id)
+            },
+            "my_order"
+        )
+        outcome = [item for item in results2 if item not in results]
+        ans = tuple(
+            (
+                [item['_id'], item['commissions'], item['executions'], item['status_title'], item['stage_title']]
+                for item in outcome
+            )
+        )
         if len(ans) == 0:
             return ()
         return ans
@@ -246,8 +261,8 @@ class MongoDB(AnyBDInterface, DBContract):
     def get_active_orders_data_for_customer_with_customer_id(self, customer_id) -> tuple:
         results = self._select_(
             {
-                "stage_title": {"$or": ["На рассмотрении", "Выполняется"]},
-                "customer_id": customer_id
+                "$or": [{"stage_title": "На рассмотрении"}, {"stage_title": "Выполняется"}],
+                "customer_id": ObjectId(customer_id)
             },
             "my_order"
         )
@@ -312,14 +327,15 @@ class MongoDB(AnyBDInterface, DBContract):
     def get_free_couriers(self) -> tuple:
         results = self._select_(
             {
-                "roles.title": "Курьер",
+                "roles": {"$elemMatch": {"role_title": "Курьер"}},
                 "status_title": "Свободен"
             },
-            "users"
+            "user"
         )
         if len(results) == 0:
             return tuple()
-        return tuple((item["_id"] for item in results))
+        ans = tuple((item["_id"] for item in results))
+        return ans
 
     def get_paid_orders(self) -> tuple:
         results = self._select_(
@@ -447,14 +463,38 @@ class MongoDB(AnyBDInterface, DBContract):
         pass
 
     def linking_transaction(self, operator_id, courier_id, order_id) -> bool:
-        pass
+        ans1 = self._update_(
+            "my_order",
+            {
+                "courier_id": ObjectId(courier_id),
+                "operator_id": ObjectId(operator_id),
+                "stage_title": "Выполняется",
+                "stage_description": "Заказ в процессе выполнения."
+            },
+            {
+                "_id": ObjectId(order_id)
+            }
+        )
+        ans2 = self._update_(
+            "user",
+            {
+                "status_title": "Занят",
+                "status_description": "Сотрудник недоступен."
+            },
+            {
+                "_id": ObjectId(courier_id)
+            }
+        )
+        return ans1 and ans2
 
     def alter_orders_status_with_order_id(self, status_title, order_id, status_description=None) -> bool:
-        return self._update_("my_order",
-                             {"status_title": status_title,
-                              "status_description": status_description,
-                              },
-                             {
-                                 "_id": order_id
-                             }
-                             )
+        return self._update_(
+            "my_order",
+            {
+                "status_title": status_title,
+                "status_description": status_description,
+            },
+            {
+                "_id": ObjectId(order_id)
+            }
+        )

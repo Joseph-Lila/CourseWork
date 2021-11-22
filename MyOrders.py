@@ -94,7 +94,7 @@ class MyOrders(MDScreen):
             btn2 = self.__button()
             btn2.text = 'Отменить заказ'
             btn2.bind(on_press=partial(self.refusing, str(collection[0])))
-            if txt_field4.text == 'Оплачен':
+            if txt_field4.text == 'Оплачен' or txt_field5.text == "Отменен":
                 btn2.disabled = True
                 btn1.disabled = True
             ans.append(btn1)
