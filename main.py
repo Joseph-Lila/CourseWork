@@ -24,7 +24,7 @@ from MyOrders import MyOrders
 from CustomerOrderBasket import CustomerOrderBasket
 
 
-import MSSql,MongoDB, DB_Recorder
+import MSSql, MongoDB, DB_Recorder
 
 
 Builder.load_file('kv-files/My.kv')

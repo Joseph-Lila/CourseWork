@@ -339,7 +339,7 @@ class MSSql(AnyBDInterface, DBContract):
         ROLLBACK TRANSACTION [refusing_transaction]
         END CATCH        
         """
-        self.__execute(sql)
+        self._execute_(sql)
         return self.check_orders_executions_and_stage_id_with_order_id(order_id)[1] == self \
             .get_stage_id_with_stage_title('Отменен')
 
@@ -377,7 +377,7 @@ class MSSql(AnyBDInterface, DBContract):
         SET @status_title = 'Не оплачен';
         
         DECLARE @user_id int;
-        SET @user_id = {User.user_id};
+        SET @user_id = {User.user_id[0]};
         
         DECLARE @customer_id int;
         SET @customer_id = (SELECT
@@ -472,7 +472,7 @@ class MSSql(AnyBDInterface, DBContract):
         SET @status_title = 'Не оплачен';
         
         DECLARE @user_id int;
-        SET @user_id = {User.user_id};
+        SET @user_id = {User.user_id[0]};
         
         DECLARE @now datetime;
         DECLARE @customer_id int;
@@ -518,7 +518,7 @@ class MSSql(AnyBDInterface, DBContract):
         for item in orders_service_tuples:
             self.orders_service_adding_transaction(item, date_time)
         return self.check_exists_order_with_commissions_and_customer_id(date_time,
-                                                                        User.user_id
+                                                                        User.user_id[0]
                                                                         )
 
     def get_services_costs_with_title(self, title) -> tuple:

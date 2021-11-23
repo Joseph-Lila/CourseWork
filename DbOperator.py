@@ -2,19 +2,6 @@ from AnyBDInterface import AnyBDInterface
 import MSSql, MongoDB, DB_Recorder
 
 
-def concat_n_words(words):
-    if len(words) == 0:
-        return ''
-    res = words[0]
-    for i in range(len(words) - 1):
-        res += ' ' + words[i + 1]
-    return res
-
-
-def split_n_words(summary):
-    return str.split(summary, " ")
-
-
 class DbOperator(AnyBDInterface):
     def __init__(self):
         self.representatives_collection = DB_Recorder.db_representatives
@@ -22,29 +9,6 @@ class DbOperator(AnyBDInterface):
     def try_connection(self) -> bool:
         results = [item.try_connection() for item in self.representatives_collection]
         return self.__check_true_collection(results)
-
-    @staticmethod
-    def __get_respective_values(ans, ans_type):
-        res = []
-        for i in range(len(ans[-1])):
-            res.append(tuple([ans[0][i], ans[1][i]]))
-        if len(res) != 0:
-            return tuple(res)
-        if ans_type == 'str':
-            return ''
-        if ans_type == 'bool':
-            return False
-        if ans_type == 'tuple':
-            return tuple()
-        if ans_type == 'int':
-            return -1
-        if ans_type == 'float':
-            return -1
-        if ans_type == 'list':
-            return []
-        if ans_type == 'set':
-            return set()
-        return None
 
     @staticmethod
     def __check_equal(results) -> bool:
@@ -98,39 +62,39 @@ class DbOperator(AnyBDInterface):
         return self.__check_true_collection(results)
 
     def is_user_plays_the_role(self, role_title, user_id) -> bool:
-        results = [item.is_user_plays_the_role(role_title, user_id) for item in self.representatives_collection]
+        results = [item.is_user_plays_the_role(role_title, user_id[i])
+                   for i, item in enumerate(self.representatives_collection, start=0)]
         return self.__get_outcomes_value(results, 'bool')
 
     def get_user_id_with_login_and_password(self, login, password) -> tuple:
-        return tuple(
-            [item.get_user_id_with_login_and_password(login, password) for item in self.representatives_collection]
-        )
+        return tuple([item.get_user_id_with_login_and_password(login, password)
+                      for item in self.representatives_collection])
 
     def get_user_roles_with_users_id(self, users_id) -> tuple:
-        results = [item.get_user_roles_with_users_id(users_id) for item in self.representatives_collection]
+        results = [item.get_user_roles_with_users_id(users_id[i])
+                   for i, item in enumerate(self.representatives_collection, start=0)]
         return self.__get_outcomes_value(results, 'tuple')
 
     def when_shall_i_be_free(self, user_id) -> bool:
-        results = [item.when_shall_i_be_free(user_id) for item in self.representatives_collection]
+        results = [item.when_shall_i_be_free(user_id[i])
+                   for i, item in enumerate(self.representatives_collection, start=0)]
         return self.__check_true_collection(results)
 
     def refusing_transaction(self, order_id) -> bool:
-        results = [item.refusing_transaction(order_id)
+        results = [item.refusing_transaction(order_id[i])
                    for i, item in enumerate(self.representatives_collection, start=0)]
         return self.__check_true_collection(results)
 
     def get_passive_orders_data_for_customer_with_customer_id(self, customer_id) -> tuple:
-        results = [item.get_passive_orders_data_for_customer_with_customer_id(customer_id)
-                   for item in self.representatives_collection]
-        return self.__get_outcomes_value(results, 'tuple')
+        return tuple([item.get_passive_orders_data_for_customer_with_customer_id(customer_id[i])
+                      for i, item in enumerate(self.representatives_collection, start=0)])
 
     def get_active_orders_data_for_customer_with_customer_id(self, customer_id) -> tuple:
-        results = [item.get_active_orders_data_for_customer_with_customer_id(customer_id)
-                   for item in self.representatives_collection]
-        return self.__get_outcomes_value(results, 'tuple')
+        return tuple([item.get_active_orders_data_for_customer_with_customer_id(customer_id[i])
+                      for i, item in enumerate(self.representatives_collection, start=0)])
 
     def alter_orders_status_with_order_id(self, orders_status, order_id, status_description) -> bool:
-        results = [item.alter_orders_status_with_order_id(orders_status, order_id, status_description)
+        results = [item.alter_orders_status_with_order_id(orders_status, order_id[i], status_description)
                    for i, item in enumerate(self.representatives_collection, start=0)]
         return self.__check_true_collection(results)
 
@@ -173,11 +137,13 @@ class DbOperator(AnyBDInterface):
         return self.__check_true_collection(results)
 
     def order_completed_transaction(self, user_id) -> bool:
-        results = [item.order_completed_transaction(user_id) for item in self.representatives_collection]
+        results = [item.order_completed_transaction(user_id)
+                   for i, item in enumerate(self.representatives_collection, start=0)]
         return self.__check_true_collection(results)
 
     def get_service_titles(self) -> tuple:
         results = [item.get_service_titles() for item in self.representatives_collection]
+        results = [set(item) for item in results]
         return self.__get_outcomes_value(results, 'tuple')
 
     def check_courier_id_not_null_with_order_id(self, order_id) -> bool:
@@ -185,17 +151,17 @@ class DbOperator(AnyBDInterface):
         return self.__check_true_collection(results)
 
     def linking_transaction(self, operator_id, courier_id, order_id) -> bool:
-        results = [item.linking_transaction(operator_id[i], courier_id[i], order_id[i])
-                   for i, item in enumerate(self.representatives_collection, start=0)]
+        results = [item.linking_transaction(operator_id, courier_id, order_id)
+                   for item in self.representatives_collection]
         return self.__check_true_collection(results)
 
     def get_paid_orders(self) -> tuple:
         results = [item.get_paid_orders() for item in self.representatives_collection]
-        return self.__get_respective_values(results, 'tuple')
+        return self.__get_outcomes_value(results, 'tuple')
 
     def get_free_couriers(self) -> tuple:
         results = [item.get_free_couriers() for item in self.representatives_collection]
-        return self.__get_respective_values(results, 'tuple')
+        return self.__get_outcomes_value(results, 'tuple')
 
     def get_city_fields_with_title(self, title) -> tuple:
         results = [item.get_city_fields_with_title(title) for item in self.representatives_collection]

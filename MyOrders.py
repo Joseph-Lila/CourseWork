@@ -29,14 +29,18 @@ class MyOrders(MDScreen):
         self.titles.clear()
         customer_id = User.user_id
         orders = orders_func(customer_id)
-        for item in orders:
+        for i, item in enumerate(orders[0], start=0):
             self.titles.append(item[0])
+            item_list = list(item)
             cont[-1].add_widget(
                 MDTextButton(
                     text='*** ' + str(self.titles[-1]) + ' ***',
                     heigh=80,
                     font_size='30sp',
-                    on_press=partial(self.any_ordering, item, on_press_func, add_buttons)
+                    on_press=partial(self.any_ordering,
+                                     [str(item[0])+". "+str(orders[1][i][0])] + item_list[1:],
+                                     on_press_func,
+                                     add_buttons)
                 )
             )
 
@@ -52,9 +56,8 @@ class MyOrders(MDScreen):
         self.note.note_with_container(cont, "", (.9, .6))
 
     def processing(self, order_id, *args):
-        status_title = ('Оплачен', 'Оплачен')
-        status_description = ('Заказ оплачен клиентом и отмена невозможна.',
-                              'Заказ оплачен клиентом и отмена невозможна.')
+        status_title = 'Оплачен'
+        status_description = 'Заказ оплачен клиентом и отмена невозможна.'
         if not DbOperator().alter_orders_status_with_order_id(status_title, order_id, status_description):
             return
         self.load_data()
@@ -90,11 +93,11 @@ class MyOrders(MDScreen):
                Widget()]
         if add_buttons:
             btn1 = self.__button()
-            btn1.bind(on_press=partial(self.processing, str(collection[0])))
+            btn1.bind(on_press=partial(self.processing, tuple(collection[0].split(". "))))
             btn1.bind(on_release=self.disable_btn)
             btn2 = self.__button()
             btn2.text = 'Отменить заказ'
-            btn2.bind(on_press=partial(self.refusing, str(collection[0])))
+            btn2.bind(on_press=partial(self.refusing, tuple(collection[0].split(". "))))
             if txt_field4.text == 'Оплачен' or txt_field5.text == "Отменен":
                 btn2.disabled = True
                 btn1.disabled = True

@@ -13,7 +13,6 @@ from kivymd.uix.textfield import MDTextField
 from CustomerOrderBasket import basket
 from DbOperator import DbOperator
 from Notification import Notification
-from kivy.uix.button import Button
 
 from collections import namedtuple
 
@@ -27,8 +26,9 @@ class CustomerOrder(MDScreen):
 
     def __init__(self, **kw):
         super().__init__(**kw)
+
+    def on_enter(self, *args):
         self.fill_services()
-        self.container.add_widget(Button(text='Hello'))
 
     def ordering(self, title, *args):
         cont = [MDBoxLayout(

@@ -159,7 +159,7 @@ class MongoDB(AnyBDInterface, DBContract):
                 "executions": None,
                 "stage_title": "На рассмотрении",
                 "stage_description": "Заказ оплачен и должен быть поручен свободному курьеру.",
-                "customer_id": User.user_id,
+                "customer_id": User.user_id[1],
                 "operator_id": None,
                 "courier_id": None,
                 "orders_services": [],
@@ -402,7 +402,6 @@ class MongoDB(AnyBDInterface, DBContract):
             "handbooks"
         )
         ans = [item for item in result if "service_title" in item.keys() and item["service_title"] == title]
-        print(ans)
         if len(ans) == 0:
             return tuple()
         ans = tuple([
