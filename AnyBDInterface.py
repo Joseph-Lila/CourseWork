@@ -23,7 +23,6 @@ class AnyBDInterface(abc.ABC):
     def sign_up_transaction(self, sign_up_tuple) -> bool:
         pass
 
-
     @abc.abstractmethod
     def order_completed_transaction(self, user_id) -> bool:
         pass

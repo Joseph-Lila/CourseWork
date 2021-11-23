@@ -115,8 +115,6 @@ class DbOperator(AnyBDInterface):
     def get_kind_titles(self) -> tuple:
         results = [item.get_kind_titles() for item in self.representatives_collection]
         results = [set(item) for item in results]
-        print(results[0])
-        print(results[1])
         return self.__get_outcomes_value(results, 'tuple')
 
     def get_services_titles_and_total_costs(self) -> tuple:
