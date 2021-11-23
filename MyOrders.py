@@ -52,8 +52,9 @@ class MyOrders(MDScreen):
         self.note.note_with_container(cont, "", (.9, .6))
 
     def processing(self, order_id, *args):
-        status_title = 'Оплачен'
-        status_description = 'Заказ оплачен клиентом и отмена невозможна.'
+        status_title = ('Оплачен', 'Оплачен')
+        status_description = ('Заказ оплачен клиентом и отмена невозможна.',
+                              'Заказ оплачен клиентом и отмена невозможна.')
         if not DbOperator().alter_orders_status_with_order_id(status_title, order_id, status_description):
             return
         self.load_data()

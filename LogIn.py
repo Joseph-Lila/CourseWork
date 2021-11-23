@@ -26,7 +26,7 @@ class LogIn(MDScreen):
             self.note.universal_note('Не все поля заполнены!', [self.my_login, self.my_password])
             return
         User.user_id = DbOperator().get_user_id_with_login_and_password(self.my_login.text, self.my_password.text)
-        if User.user_id == -1:
+        if User.user_id == tuple():
             self.note.universal_note('Такого пользователя в системе нет!', [self.my_login, self.my_password])
             return
         user_roles = DbOperator().get_user_roles_with_users_id(User.user_id)

@@ -2,7 +2,7 @@ from kivy.properties import ObjectProperty
 from kivy.uix.togglebutton import ToggleButton
 from kivy.uix.widget import Widget
 from kivymd.uix.screen import MDScreen
-
+from DbOperator import concat_n_words, split_n_words
 import User
 from DbOperator import DbOperator
 from Notification import Notification
@@ -29,7 +29,7 @@ class Operator(MDScreen):
             return
         cont[-1].add_widget(Widget())
         for i in range(len(items_to_show)):
-            self.titles.append(items_to_show[i])
+            self.titles.append(concat_n_words(items_to_show[i]))
             cont[-1].add_widget(ToggleButton(text=str(self.titles[-1]),
                                              size_hint_y=None,
                                              height='48dp',
@@ -42,10 +42,10 @@ class Operator(MDScreen):
         courier_id = 0
         for i in self.cont1.children:
             if isinstance(i, ToggleButton) and i.state == 'down':
-                courier_id = i.text
+                courier_id = split_n_words(i.text)
         for i in self.cont2.children:
             if isinstance(i, ToggleButton) and i.state == 'down':
-                order_id = i.text
+                order_id = split_n_words(i.text)
         if not DbOperator().linking_transaction(User.User.user_id,
                                                 courier_id,
                                                 order_id):
