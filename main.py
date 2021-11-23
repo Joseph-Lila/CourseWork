@@ -2,7 +2,7 @@ from kivy.config import Config
 
 Config.set('kivy', 'keyboard_mode', 'systemanddock')
 Config.set('graphics', 'resizable', False)
-Config.set("graphics", "width", 480)
+Config.set("graphics", "width", 580)
 Config.set("graphics", "height", 850)
 
 from kivymd.app import MDApp

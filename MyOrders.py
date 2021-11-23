@@ -30,11 +30,11 @@ class MyOrders(MDScreen):
         customer_id = User.user_id
         orders = orders_func(customer_id)
         for i, item in enumerate(orders[0], start=0):
-            self.titles.append(item[0])
+            self.titles.append(str(item[0])+". "+str(orders[1][i][0]))
             item_list = list(item)
             cont[-1].add_widget(
                 MDTextButton(
-                    text='*** ' + str(self.titles[-1]) + ' ***',
+                    text=str(self.titles[-1]),
                     heigh=80,
                     font_size='30sp',
                     on_press=partial(self.any_ordering,
