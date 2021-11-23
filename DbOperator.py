@@ -1,5 +1,5 @@
 from AnyBDInterface import AnyBDInterface
-import MSSql, MongoDB, DB_Recorder
+import MongoDB, DB_Recorder
 
 
 class DbOperator(AnyBDInterface):

@@ -513,7 +513,6 @@ class MongoDB(AnyBDInterface, DBContract):
                     pos_j = j
                     break
         fleet_transport = copy.deepcopy(fleets_collection[pos_i]["fleet_transport"])
-        del(fleet_transport[pos_j])
         new_elem = {
             "transport_id": ObjectId(fleets_collection[pos_i]["fleet_transport"][pos_j]["transport_id"]),
             "kind_id": ObjectId(data[0]),
@@ -522,7 +521,7 @@ class MongoDB(AnyBDInterface, DBContract):
             "kind_lifting_capacity": float(data[3]),
             "kind_volume": float(data[4]),
         }
-        fleet_transport.append(new_elem)
+        fleet_transport[pos_j] = new_elem
         fleets_collection[pos_i]["fleet_transport"] = fleet_transport
         # 3
         ans[0]["city_fleets"] = fleets_collection

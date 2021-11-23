@@ -43,22 +43,13 @@ def _insert_(database, insert_into_, what_, values_=None) -> bool:
     except:
         return False
 
-
-def get_services_titles_and_total_costs(database):
-    pipe2 = [
-        {
-            "$unwind": "$orders_services.service_title"
-        },
-        {
-            "$group": {
-                "_id": "$orders_services.service_title",
-                "total_cost": {"$sum": "$orders_services.total_cost"},
-            }
-        }
-    ]
-    results = database["my_order"].aggregate(pipeline=pipe2)
-    for x in results:
-        print(x)
-
-
-get_services_titles_and_total_costs(mydb)
+_update_(
+    mydb,
+    "my_order",
+    {
+        "stage_title": "Выполнен"
+    },
+    {
+        "_id": ObjectId("6199f45580ba05e82a68879e")
+    }
+)
