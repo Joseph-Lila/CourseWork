@@ -8,19 +8,16 @@ tables = [
     ("city", 1, "csv/city.csv"),
     ("roles", 2, "csv/role.csv"),
     ("users", 4, "csv/user.csv"),
-    ("fleet", 5, "csv/fleet.csv"),
+    ("fleet", 6, "csv/fleet.csv"),
     ("services", 4, "csv/service.csv"),
     ("customer", 8, "csv/customer.csv"),
     ("customers_city", 2, "csv/customers_city.csv"),
     ("employee", 6, "csv/employee.csv"),
     ("users_role", 2, "csv/users_role.csv"),
-    ("fleets_city", 2, "csv/fleets_city.csv"),
     ("transport", 2, "csv/transport.csv"),
     ("my_order", 7, "csv/my_order.csv"),
     ("orders_transport", 2, "csv/orders_transport.csv"),
-    ("orders_service", 7, "csv/orders_service.csv"),
-    ("order_services_begin_city", 2, "csv/order_services_begin_city.csv"),
-    ("order_services_end_city", 2, "csv/order_services_end_city.csv"),
+    ("orders_service", 9, "csv/orders_service.csv")
 ]
 
 

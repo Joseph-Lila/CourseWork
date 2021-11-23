@@ -1,59 +1,59 @@
 from kivy.properties import ObjectProperty
 from kivymd.uix.screen import MDScreen
-import matplotlib.dates as mdates
-import matplotlib
-from matplotlib import pylab
-from WithDB import WithDB
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+from DbOperator import DbOperator
+from kivy.uix.image import Image
 
 
 class Reports(MDScreen):
-    statistic = ObjectProperty(None)
-    volume_per_month = ObjectProperty(None)
+    services_pie = ObjectProperty(None)
+    months_pie = ObjectProperty(None)
+    cities_pie = ObjectProperty(None)
 
     def __init__(self, **kw):
         super().__init__(**kw)
-        self.fill_volume_per_month()
-        self.fill_statistic()
 
-    def fill_statistic(self):
-        self.__profit_per_month()
-        self.__services_diagramm()
-        self.__customers_cities_giagramm()
+    def on_enter(self, *args):
+        self.load_data()
 
-    def fill_volume_per_month(self):
-        pass
+    def go_back(self, *args):
+        self.manager.current = 'director'
 
-    def __profit_per_month(self):
-        db_pointer = WithDB()
-        data = []
-        if not db_pointer.get_smth('get_sum_profit_for_each_month', [], data):
-            return None
-        if len(data) == 0:
-            return None
-        dates = []
-        y = []
-        for i in range(len(data)):
-            dates.append(data[i][0])
-            y.append(data[i][1])
-        xdata_float = matplotlib.dates.date2num(dates)
-        axes = pylab.subplot(1, 1, 1)
-        axes.xaxis.set_major_formatter(matplotlib.dates.DateFormatter('%Y'))
-        pylab.plot_date(xdata_float, y, fmt='b-')
-        pylab.grid()
-        pylab.savefig('pictures/profit_per_month.png')
+    def fill_services_pie(self):
+        self.__get_pie(DbOperator().get_services_titles_and_total_costs, "Доходы по услугам (%)")
+        self.services_pie.add_widget(Image(source='pictures/pieДоходы по услугам (%).png'))
 
-    def __services_diagramm(self):
-        db_pointer = WithDB()
-        data = []
-        if not db_pointer.get_smth('get_quantity_of_each_services_item', [], data):
-            return None
-        if len(data) == 0:
-            return None
-        print(data)
+    def fill_months_pie(self):
+        self.__get_pie(DbOperator().get_months_quantity_orders, "Услуги по месяцам  (%)")
+        self.months_pie.add_widget(Image(source='pictures/pieУслуги по месяцам  (%).png'))
 
-    def __customers_cities_giagramm(self):
-        pass
+    def fill_cities_pie(self):
+        self.__get_pie(DbOperator().get_cities_quantity_orders, "Услуги по городам  (%)")
+        self.cities_pie.add_widget(Image(source='pictures/pieУслуги по городам  (%).png'))
+
+    @staticmethod
+    def __get_pie(func, title):
+        data_collection = func()
+        data_names = [item[0] for item in data_collection]
+        data_values = [item[1] for item in data_collection]
+        dpi = 80
+        fig = plt.figure(dpi=dpi, figsize=(512 / dpi, 384 / dpi))
+        mpl.rcParams.update({'font.size': 9})
+        plt.title(title)
+        xs = range(len(data_names))
+        plt.pie(
+            data_values, autopct='%.1f', radius=1.2,
+            explode=[0.15] + [0 for item in range(len(data_names) - 1)])
+        plt.legend(
+            bbox_to_anchor=(-0.16, 0.45, 0.25, 0.25),
+            loc='lower left', labels=data_names)
+        fig.savefig(f'pictures/pie{title}.png')
 
     def load_data(self):
-        self.fill_volume_per_month()
-        self.fill_statistic()
+        if not DbOperator().try_connection():
+            self.note.universal_note('Нет соединеня с одной из БД!', [])
+            return
+        self.fill_cities_pie()
+        self.fill_services_pie()
+        self.fill_months_pie()

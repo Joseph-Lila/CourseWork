@@ -1,5 +1,5 @@
 from AnyBDInterface import AnyBDInterface
-import MSSql, DB_Recorder
+import MSSql, MongoDB, DB_Recorder
 
 
 class DbOperator(AnyBDInterface):
@@ -7,18 +7,8 @@ class DbOperator(AnyBDInterface):
         self.representatives_collection = DB_Recorder.db_representatives
 
     def try_connection(self) -> bool:
-        results = []
-        for item in self.representatives_collection:
-            results.append(item.try_connection())
+        results = [item.try_connection() for item in self.representatives_collection]
         return self.__check_true_collection(results)
-
-    def confirm_changes(self):
-        for item in self.representatives_collection:
-            item.confirm_changes()
-
-    def rollback_changes(self):
-        for item in self.representatives_collection:
-            item.rollback_changes()
 
     @staticmethod
     def __check_equal(results) -> bool:
@@ -39,90 +29,167 @@ class DbOperator(AnyBDInterface):
                 return False
         return True
 
-    def __make_true_decision(self, results) -> bool:
-        if self.__check_true_collection(results):
-            self.confirm_changes()
-            return True
-        else:
-            self.rollback_changes()
+    @staticmethod
+    def __get_outcomes_value(results, ans_type):
+        if DbOperator().__check_equal(results):
+            return results[-1]
+        if ans_type == 'str':
+            return ''
+        if ans_type == 'bool':
             return False
-
-    def __make_a_decision(self, results) -> bool:
-        if self.__check_equal(results):
-            self.confirm_changes()
-            return True
-        else:
-            self.rollback_changes()
-            return False
-
-    def __get_outcomes_value(self, results):
-        if self.__check_equal(results):
-            return results[0]
+        if ans_type == 'tuple':
+            return tuple()
+        if ans_type == 'int':
+            return -1
+        if ans_type == 'float':
+            return -1
+        if ans_type == 'list':
+            return []
+        if ans_type == 'set':
+            return set()
         return None
 
     def check_exists_user_with_login(self, login) -> bool:
-        results = list()
-        for item in self.representatives_collection:
-            results.append(item.check_exists_user_with_login(login))
-        print(self.__get_outcomes_value(results))
-        return self.__get_outcomes_value(results)
+        results = [item.check_exists_user_with_login(login) for item in self.representatives_collection]
+        return self.__get_outcomes_value(results, 'bool')
 
     def check_exists_city_with_title(self, title) -> bool:
-        results = list()
-        for item in self.representatives_collection:
-            results.append(item.check_exists_city_with_title(title))
-        return self.__get_outcomes_value(results)
+        results = [item.check_exists_city_with_title(title) for item in self.representatives_collection]
+        return self.__get_outcomes_value(results, bool)
 
-    def create_user(self, login, password, email, phone_number) -> bool:
-        results = []
-        for item in self.representatives_collection:
-            results.append(item.create_user(login, password, email, phone_number))
-        return self.__make_true_decision(results)
+    def sign_up_transaction(self, sign_up_tuple) -> bool:
+        results = [item.sign_up_transaction(sign_up_tuple) for item in self.representatives_collection]
+        return self.__check_true_collection(results)
 
-    def get_user_id_with_login(self, login):
-        results = list()
-        for item in self.representatives_collection:
-            results.append(item.get_user_id_with_login(login))
-        return self.__get_outcomes_value(results)
+    def is_user_plays_the_role(self, role_title, user_id) -> bool:
+        results = [item.is_user_plays_the_role(role_title, user_id[i])
+                   for i, item in enumerate(self.representatives_collection, start=0)]
+        return self.__get_outcomes_value(results, 'bool')
 
-    def delete_user_with_login(self, login) -> bool:
-        results = []
-        for item in self.representatives_collection:
-            results.append(item.delete_user_with_login(login))
-        return self.__get_outcomes_value(results)
+    def get_user_id_with_login_and_password(self, login, password) -> tuple:
+        return tuple([item.get_user_id_with_login_and_password(login, password)
+                      for item in self.representatives_collection])
 
-    def create_customer(self, data_collection) -> bool:
-        results = list()
-        for item in self.representatives_collection:
-            results.append(item.create_customer(data_collection))
-        return self.__make_true_decision(results)
+    def get_user_roles_with_users_id(self, users_id) -> tuple:
+        results = [item.get_user_roles_with_users_id(users_id[i])
+                   for i, item in enumerate(self.representatives_collection, start=0)]
+        return self.__get_outcomes_value(results, 'tuple')
 
-    def get_customer_id_with_user_id(self, user_id):
-        results = []
-        for item in self.representatives_collection:
-            results.append(item.get_customer_id_with_user_id(user_id))
-        return self.__get_outcomes_value(results)
+    def when_shall_i_be_free(self, user_id) -> bool:
+        results = [item.when_shall_i_be_free(user_id[i])
+                   for i, item in enumerate(self.representatives_collection, start=0)]
+        return self.__check_true_collection(results)
 
-    def get_city_id_with_city_title(self, title):
-        results = []
-        for item in self.representatives_collection:
-            results.append(item.get_city_id_with_city_title(title))
-        return self.__get_outcomes_value(results)
+    def refusing_transaction(self, order_id) -> bool:
+        results = [item.refusing_transaction(order_id[i])
+                   for i, item in enumerate(self.representatives_collection, start=0)]
+        return self.__check_true_collection(results)
 
-    def insert_customers_city(self, customer_id, city_id) -> bool:
-        results = []
-        for item in self.representatives_collection:
-            results.append(item.insert_customers_city(customer_id, city_id))
-        return self.__make_true_decision(results)
+    def get_passive_orders_data_for_customer_with_customer_id(self, customer_id) -> tuple:
+        return tuple([item.get_passive_orders_data_for_customer_with_customer_id(customer_id[i])
+                      for i, item in enumerate(self.representatives_collection, start=0)])
 
-    def get_role_id_with_role_title(self, title):
-        results = []
-        for item in self.representatives_collection:
-            results.append(item.get_role_id_with_role_title(title))
-        return self.__get_outcomes_value(results)
+    def get_active_orders_data_for_customer_with_customer_id(self, customer_id) -> tuple:
+        return tuple([item.get_active_orders_data_for_customer_with_customer_id(customer_id[i])
+                      for i, item in enumerate(self.representatives_collection, start=0)])
 
-    def insert_users_role(self, user_id, role_id) -> bool:
-        results = []
-        for item in self.representatives_collection:
-            results.append(item.insert_users_role(user_id, role_id))
-        return self.__make_true_decision(results)
+    def alter_orders_status_with_order_id(self, orders_status, order_id, status_description) -> bool:
+        results = [item.alter_orders_status_with_order_id(orders_status, order_id[i], status_description)
+                   for i, item in enumerate(self.representatives_collection, start=0)]
+        return self.__check_true_collection(results)
+
+    def get_services_costs_with_title(self, title) -> tuple:
+        results = [item.get_services_costs_with_title(title) for item in self.representatives_collection]
+        return self.__get_outcomes_value(results, 'tuple')
+
+    def get_city_titles(self) -> tuple:
+        results = [item.get_city_titles() for item in self.representatives_collection]
+        results = [set(item) for item in results]
+        return self.__get_outcomes_value(results, 'tuple')
+
+    def get_fleet_titles(self) -> tuple:
+        results = [item.get_fleet_titles() for item in self.representatives_collection]
+        results = [set(item) for item in results]
+        return self.__get_outcomes_value(results, 'tuple')
+
+    def get_kind_titles(self) -> tuple:
+        results = [item.get_kind_titles() for item in self.representatives_collection]
+        results = [set(item) for item in results]
+        print(results[0])
+        print(results[1])
+        return self.__get_outcomes_value(results, 'tuple')
+
+    def get_services_titles_and_total_costs(self) -> tuple:
+        results = [self.representatives_collection[0].get_services_titles_and_total_costs()]
+        return self.__get_outcomes_value(results, 'tuple')
+
+    def get_months_quantity_orders(self) -> tuple:
+        results = [self.representatives_collection[0].get_months_quantity_orders()]
+        return self.__get_outcomes_value(results, 'tuple')
+
+    def get_cities_quantity_orders(self) -> tuple:
+        results = [self.representatives_collection[0].get_cities_quantity_orders()]
+        return self.__get_outcomes_value(results, 'tuple')
+
+    def check_exists_order_with_commissions_and_customer_id(self, commissions, customer_id) -> bool:
+        results = [item.check_exists_order_with_commissions_and_customer_id(commissions, customer_id)
+                   for item in self.representatives_collection]
+        return self.__check_true_collection(results)
+
+    def customer_order_transaction(self, orders_service_tuples) -> bool:
+        results = [item.customer_order_transaction(orders_service_tuples)
+                   for item in self.representatives_collection]
+        return self.__check_true_collection(results)
+
+    def order_completed_transaction(self, user_id) -> bool:
+        results = [item.order_completed_transaction(user_id[i])
+                   for i, item in enumerate(self.representatives_collection, start=0)]
+        return self.__check_true_collection(results)
+
+    def get_service_titles(self) -> tuple:
+        results = [item.get_service_titles() for item in self.representatives_collection]
+        results = [set(item) for item in results]
+        return self.__get_outcomes_value(results, 'tuple')
+
+    def check_courier_id_not_null_with_order_id(self, order_id) -> bool:
+        results = [item.check_courier_id_not_null_with_order_id(order_id) for item in self.representatives_collection]
+        return self.__check_true_collection(results)
+
+    def linking_transaction(self, operator_id, courier_id, order_id) -> bool:
+        results = [item.linking_transaction(operator_id[i], courier_id[i], order_id[i])
+                   for i, item in enumerate(self.representatives_collection, start=0)]
+        return self.__check_true_collection(results)
+
+    def get_paid_orders(self) -> tuple:
+        return tuple([item.get_paid_orders() for item in self.representatives_collection])
+
+    def get_free_couriers(self) -> tuple:
+        return tuple([item.get_free_couriers() for item in self.representatives_collection])
+
+    def get_city_fields_with_title(self, title) -> tuple:
+        return tuple([item.get_city_fields_with_title(title) for item in self.representatives_collection])
+
+    def alter_city_using_str_collection(self, data):
+        for i, item in enumerate(self.representatives_collection, start=0):
+            item.alter_city_using_str_collection(data[i])
+
+    def get_service_fields_with_title(self, title) -> tuple:
+        return tuple([item.get_service_fields_with_title(title) for item in self.representatives_collection])
+
+    def get_kind_fields_with_title(self, title) -> tuple:
+        return tuple([item.get_kind_fields_with_title(title) for item in self.representatives_collection])
+
+    def get_fleet_fields_with_title(self, title) -> tuple:
+        return tuple([item.get_fleet_fields_with_title(title) for item in self.representatives_collection])
+
+    def alter_service_using_str_collection(self, data):
+        for i, item in enumerate(self.representatives_collection, start=0):
+            item.alter_service_using_str_collection(data[i])
+
+    def alter_kind_using_str_collection(self, data):
+        for i, item in enumerate(self.representatives_collection, start=0):
+            item.alter_kind_using_str_collection(data[i])
+
+    def alter_fleet_using_str_collection(self, data):
+        for i, item in enumerate(self.representatives_collection, start=0):
+            item.alter_fleet_using_str_collection(data[i])

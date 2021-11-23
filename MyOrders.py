@@ -1,17 +1,14 @@
-import datetime
-
 from kivy.properties import ObjectProperty
 from kivy.uix.widget import Widget
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.button import MDTextButton, MDFillRoundFlatButton
-from kivymd.uix.label import MDLabel
 from kivymd.uix.screen import MDScreen
 from functools import partial
-from random import randrange
 from kivymd.uix.textfield import MDTextField
+
+from DbOperator import DbOperator
 from Notification import Notification
 from User import User
-from WithDB import WithDB
 
 
 class MyOrders(MDScreen):
@@ -23,116 +20,54 @@ class MyOrders(MDScreen):
 
     def __init__(self, **kw):
         super().__init__(**kw)
-        self.fill_first_cont()
-        self.fill_second_cont()
 
-    def fill_second_cont(self):
-        self.cont2.clear_widgets()
+    def on_enter(self, *args):
+        self.load_data()
+
+    def fill_any_cont(self, cont, on_press_func, orders_func, add_buttons):
+        cont[-1].clear_widgets()
         self.titles.clear()
-        db_pointer = WithDB()
-        customer_id = []
-        if not db_pointer.get_smth('get_customer_id_with_user_id', [User.user_id], customer_id):
-            return None
-        if len(customer_id) == 0:
-            return None
-        customer_id = customer_id[0][0]
-        db_pointer = WithDB()
-        orders = []
-        if not db_pointer.get_smth('get_passive_orders_data_for_customer_with_customer_id', [customer_id], orders):
-            self.cont2.add_widget(MDLabel(text='Список пуст.'))
-        else:
-            for i in range(len(orders)):
-                self.titles.append(orders[i][0])
+        customer_id = User.user_id
+        orders = orders_func(customer_id)
+        for i, item in enumerate(orders[0], start=0):
+            self.titles.append(str(item[0])+". "+str(orders[1][i][0]))
+            item_list = list(item)
+            cont[-1].add_widget(
+                MDTextButton(
+                    text=str(self.titles[-1]),
+                    heigh=80,
+                    font_size='30sp',
+                    on_press=partial(self.any_ordering,
+                                     [str(item[0])+". "+str(orders[1][i][0])] + item_list[1:],
+                                     on_press_func,
+                                     add_buttons)
+                )
+            )
 
-                self.cont2.add_widget(MDTextButton(text='*** ' + str(self.titles[-1]) + ' ***',
-                                                   heigh=80,
-                                                   custom_color=[randrange(256) / 255, randrange(256) / 255,
-                                                                 randrange(256) / 255, 255 / 255],
-                                                   font_size='30sp',
-                                                   on_press=partial(self.ordering_second, orders[i])
-                                                   )
-                                      )
-
-    def fill_first_cont(self):
-        self.cont1.clear_widgets()
-        self.titles.clear()
-        db_pointer = WithDB()
-        customer_id = []
-        if not db_pointer.get_smth('get_customer_id_with_user_id', [User.user_id], customer_id):
-            return None
-        if len(customer_id) == 0:
-            return None
-        customer_id = customer_id[0][0]
-        orders = []
-        if not db_pointer.get_smth('get_active_orders_data_for_customer_with_customer_id', [customer_id], orders):
-            self.cont1.add_widget(MDLabel(text='Список пуст.'))
-        else:
-            for i in range(len(orders)):
-                self.titles.append(orders[i][0])
-
-                self.cont1.add_widget(MDTextButton(text='*** ' + str(self.titles[-1]) + ' ***',
-                                                   heigh=80,
-                                                   custom_color=[randrange(256) / 255, randrange(256) / 255,
-                                                                 randrange(256) / 255, 255 / 255],
-                                                   font_size='30sp',
-                                                   on_press=partial(self.ordering, orders[i])
-                                                   )
-                                      )
-
-    def ordering(self, collection, *args):
-        cont = []
-        cont.append(MDBoxLayout(
+    def any_ordering(self, collection, fun, add_buttons, *args):
+        cont = [MDBoxLayout(
             height='410dp',
             orientation='vertical',
             size_hint_y=None
-        )
-        )
-        widgets = self.__widgets_for_ordering(collection)
-        for i in range(len(widgets)):
-            cont[0].add_widget(widgets[i])
-        self.note.note_with_container(cont)
-
-    def ordering_second(self, collection, *args):
-        cont = []
-        cont.append(MDBoxLayout(
-            height='410dp',
-            orientation='vertical',
-            size_hint_y=None
-        )
-        )
-        widgets = self.__widgets_for_ordering_second(collection)
-        for i in range(len(widgets)):
-            cont[0].add_widget(widgets[i])
-        self.note.note_with_container(cont)
+        )]
+        widgets = fun(collection, add_buttons)
+        for item in widgets:
+            cont[0].add_widget(item)
+        self.note.note_with_container(cont, "", (.9, .6))
 
     def processing(self, order_id, *args):
-        db_pointer = WithDB()
-        status_id = []
-        if not db_pointer.get_smth('get_status_id_with_status_title', ['Оплачен'], status_id):
-            return None
-        else:
-            status_id = status_id[0][0]
-        if not db_pointer.insert_delete_alter_smth('alter_orders_status_id_with_order_id',
-                                                   [status_id, order_id]):
-            return None
-        self.fill_first_cont()
-        self.fill_second_cont()
+        status_title = 'Оплачен'
+        status_description = 'Заказ оплачен клиентом и отмена невозможна.'
+        if not DbOperator().alter_orders_status_with_order_id(status_title, order_id, status_description):
+            return
+        self.load_data()
 
     def refusing(self, order_id, *args):
-        db_pointer = WithDB()
-        stage_id = []
-        now = datetime.datetime.date(datetime.datetime.today())
-        if not db_pointer.get_smth('get_stage_id_with_stage_title', ['Отменен'], stage_id):
-            return None
-        else:
-            stage_id = stage_id[0][0]
-        if not db_pointer.insert_delete_alter_smth('add_orders_executions_and_stage_id_with_order_id',
-                                                   [now, stage_id, order_id]):
-            return None
-        self.fill_first_cont()
-        self.fill_second_cont()
+        if not DbOperator().refusing_transaction(order_id):
+            return
+        self.load_data()
 
-    def __widgets_for_ordering(self, collection):
+    def __widgets_for_any_ordering(self, collection, add_buttons=False):
         txt_field1 = self.__txt_field('Код заказа')
         txt_field1.disabled = True
         txt_field1.text = str(collection[0])
@@ -150,65 +85,57 @@ class MyOrders(MDScreen):
         txt_field5 = self.__txt_field('Этап')
         txt_field5.disabled = True
         txt_field5.text = collection[4]
-        btn1 = self.__button()
-        btn1.bind(on_press=partial(self.processing, str(collection[0])))
-        btn2 = self.__button()
-        btn2.text = 'Отменить заказ'
-        btn2.bind(on_press=partial(self.refusing, str(collection[0])))
-        if txt_field4.text == 'Оплачен':
-            btn2.disabled = True
+        ans = [txt_field1,
+               txt_field2,
+               txt_field3,
+               txt_field4,
+               txt_field5,
+               Widget()]
+        if add_buttons:
+            btn1 = self.__button()
+            btn1.bind(on_press=partial(self.processing, tuple(collection[0].split(". "))))
+            btn1.bind(on_release=self.disable_btn)
+            btn2 = self.__button()
+            btn2.text = 'Отменить заказ'
+            btn2.bind(on_press=partial(self.refusing, tuple(collection[0].split(". "))))
+            if txt_field4.text == 'Оплачен' or txt_field5.text == "Отменен":
+                btn2.disabled = True
+                btn1.disabled = True
+            ans.append(btn1)
+            ans.append(Widget())
+            ans.append(btn2)
+        return ans
 
-        return [txt_field1,
-                txt_field2,
-                txt_field3,
-                txt_field4,
-                txt_field5,
-                Widget(),
-                btn1,
-                Widget(),
-                btn2]
-
-    def __widgets_for_ordering_second(self, collection):
-        txt_field1 = self.__txt_field('Код заказа')
-        txt_field1.disabled = True
-        txt_field1.text = str(collection[0])
-        txt_field2 = self.__txt_field('Дата начала')
-        txt_field2.disabled = True
-        if collection[1] is not None:
-            txt_field2.text = str(collection[1].year) + '-' + str(collection[1].month) + '-' + str(collection[1].day)
-        txt_field3 = self.__txt_field('Дата выполнения')
-        txt_field3.disabled = True
-        if collection[2] is not None:
-            txt_field3.text = str(collection[2].year) + '-' + str(collection[2].month) + '-' + str(collection[2].day)
-        txt_field4 = self.__txt_field('Статус')
-        txt_field4.disabled = True
-        txt_field4.text = collection[3]
-        txt_field5 = self.__txt_field('Этап')
-        txt_field5.disabled = True
-        txt_field5.text = collection[4]
-        return [txt_field1,
-                txt_field2,
-                txt_field3,
-                txt_field4,
-                txt_field5,
-                Widget()]
+    def disable_btn(self, btn, *args):
+        btn.disabled = True
 
     def load_data(self, *args):
-        self.fill_first_cont()
-        self.fill_second_cont()
+        if not DbOperator().try_connection():
+            self.note.universal_note('Нет соединеня с одной из БД!', [])
+            return
+        self.fill_any_cont([self.cont1],
+                           self.__widgets_for_any_ordering,
+                           DbOperator().get_active_orders_data_for_customer_with_customer_id,
+                           True
+                           )
+        self.fill_any_cont([self.cont2],
+                           self.__widgets_for_any_ordering,
+                           DbOperator().get_passive_orders_data_for_customer_with_customer_id,
+                           False
+                           )
 
     @staticmethod
-    def __txt_field(text_hint):
+    def __txt_field(helper_text):
         txt_field = MDTextField()
         txt_field.pos_hint = {'center': .5}
-        txt_field.color_mode = 'primary'
         txt_field.mode = 'rectangle'
         txt_field.size_hint_x = None
         txt_field.size_hint_y = None
         txt_field.height = 40
         txt_field.font_size = 20
         txt_field.width = 350
-        txt_field.text_hint = text_hint
+        txt_field.helper_text_mode = 'persistent'
+        txt_field.helper_text = helper_text
         return txt_field
 
     @staticmethod

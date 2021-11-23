@@ -1,0 +1,25 @@
+<ListItemWithCheckbox>:
+
+    IconLeftWidget:
+        icon: root.icon
+
+    RightCheckbox:
+
+<CustomerOrderBasket>:
+    container: container
+
+    MDBoxLayout:
+        orientation: "vertical"
+
+        MDToolbar:
+            title: "СПИСОК УСЛУГ"
+            md_bg_color: [200/255, 35/255, 100/255, 255/255]
+            elevation: 30
+            right_action_items: [["basket-off", lambda x: self.parent.parent.go_back()], ["basket-minus", lambda x: self.parent.parent.remove_gui_items()], ["basket-plus", lambda x: self.parent.parent.add_items()], ["credit-card-outline", lambda x: self.parent.parent.pay_and_register_service_in_order()]]
+
+        BoxLayout:
+
+            ScrollView:
+
+                MDList:
+                    id: container
