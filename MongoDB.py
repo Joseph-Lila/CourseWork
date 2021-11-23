@@ -480,13 +480,6 @@ class MongoDB(AnyBDInterface, DBContract):
         )
 
     def alter_kind_using_str_collection(self, data):
-        """
-                1) получить виды транспорта
-                2) удалить изменяемый вид транспорта из списка
-                3) добавить в конец списка новый (измененный)
-                4) выполнить update
-                """
-        # 1
         results = self._select_(
             {},
             "handbooks"
@@ -502,7 +495,6 @@ class MongoDB(AnyBDInterface, DBContract):
                                 break
         if len(ans) == 0:
             return
-        # 2
         pos_i = -1
         pos_j = -1
         fleets_collection = ans[0]["city_fleets"]
@@ -523,9 +515,7 @@ class MongoDB(AnyBDInterface, DBContract):
         }
         fleet_transport[pos_j] = new_elem
         fleets_collection[pos_i]["fleet_transport"] = fleet_transport
-        # 3
         ans[0]["city_fleets"] = fleets_collection
-        # 4
         return self._update_(
             "handbooks",
             {
@@ -538,13 +528,6 @@ class MongoDB(AnyBDInterface, DBContract):
         )
 
     def alter_fleet_using_str_collection(self, data):
-        """
-        1) получить парки города
-        2) удалить изменяемый парк из списка
-        3) добавить в конец списка новый (измененный)
-        4) выполнить update
-        """
-        # 1
         results = self._select_(
             {},
             "handbooks"
@@ -558,7 +541,6 @@ class MongoDB(AnyBDInterface, DBContract):
                         break
         if len(ans) == 0:
             return
-        # 2
         fleets_collection = ans[0]["city_fleets"]
         pos = -1
         for i, item in enumerate(fleets_collection, start=0):
@@ -574,11 +556,8 @@ class MongoDB(AnyBDInterface, DBContract):
             "stars_quantity": int(data[4]),
             "fleet_transport": fleet_item["fleet_transport"]
         }
-        del(fleets_collection[pos])
-        # 3
-        fleets_collection.append(new_elem)
+        fleets_collection[pos] = new_elem
         ans[0]["city_fleets"] = fleets_collection
-        # 4
         return self._update_(
             "handbooks",
             {
