@@ -6,6 +6,7 @@ from AnyBDInterface import AnyBDInterface
 from DBContract import DBContract
 from DB_Recorder import db_recorder
 from bson.objectid import ObjectId
+import copy
 
 
 @db_recorder
@@ -128,7 +129,6 @@ class MongoDB(AnyBDInterface, DBContract):
                 "_id": ObjectId(user_id)
             }
         )
-        print(ans1, ans2)
         return ans1 and ans2
 
     def refusing_transaction(self, order_id) -> bool:
@@ -176,10 +176,9 @@ class MongoDB(AnyBDInterface, DBContract):
             {
                 "commissions": date_time
             },
-            "handbooks"
+            "my_order"
         )
-        ans = [item["orders_services"] for item in results]
-        return ans
+        return results[0]["orders_services"]
 
     def orders_service_adding_transaction(self, orders_service_tuple, date_time) -> bool:
         current_orders_services = self.get_current_orders_services(date_time)
@@ -309,7 +308,7 @@ class MongoDB(AnyBDInterface, DBContract):
             {},
             "handbooks"
         )
-        return tuple((item["service_title"] for item in results if "service_title" in item.keys()))
+        return tuple(item["service_title"] for item in results if "service_title" in item.keys())
 
     def check_courier_id_not_null_with_order_id(self, order_id) -> bool:
         results = self._select_(
@@ -350,70 +349,41 @@ class MongoDB(AnyBDInterface, DBContract):
         return tuple((item["_id"] for item in results))
 
     def get_services_titles_and_total_costs(self) -> tuple:
-        results = self.database["handbooks"].aggregate(
-            [
-                {
-                    "$group": {
-                        "service_title": "$service_title",
-                        "total_cost": {
-                            "$sum": "$total_cost"
-                        }
-                    }
-                }
-            ]
-        )
-        if len(results) == 0:
-            return tuple()
-        return tuple(
-            [item["service_title"], item['total_cost']] for item in results
-        )
+        return tuple()
 
     def get_months_quantity_orders(self) -> tuple:
-        results = self.database["my_order"].aggregate(
-            [
-                {
-                    "$group": {
-                        "months": {
-                            "$month": "$commissions"
-                        },
-                        "quantity": {
-                            "$count": "$_id"
-                        }
-                    }
-                }
-            ]
-        )
-        if len(results) == 0:
-            return tuple()
-        return tuple(
-            [datetime.date(1900, item["months"], 1).strftime('%B'), item['quantity']]
-            for item in results
-        )
+        return tuple()
 
     def get_cities_quantity_orders(self) -> tuple:
-        results = self.database["my_order"].aggregate(
-            [
-                {
-                    "$group": {
-                        "service_title": "$orders_services.begin_city_id",
-                        "total_cost": {
-                            "$count": "$orders_services.service_id"
-                        }
-                    }
-                }
-            ]
-        )
-        if len(results) == 0:
-            return tuple()
-        return tuple(
-            [item["service_title"], item['total_cost']] for item in results
-        )
+        return tuple()
 
     def get_fleet_titles(self) -> tuple:
-        pass
+        results = self._select_(
+            {},
+            "handbooks"
+        )
+        ans = []
+        for item in results:
+            if "city_fleets" in item.keys():
+                for item_of_item in item["city_fleets"]:
+                    if "fleet_title" in item_of_item.keys():
+                        ans.append(item_of_item["fleet_title"])
+        return tuple(ans)
 
     def get_kind_titles(self) -> tuple:
-        pass
+        results = self._select_(
+            {},
+            "handbooks"
+        )
+        ans = []
+        for item in results:
+            if "city_fleets" in item.keys():
+                for item_of_item in item["city_fleets"]:
+                    if "fleet_transport" in item_of_item.keys():
+                        for item_of_item_of_item in item_of_item["fleet_transport"]:
+                            if "kind_title" in item_of_item_of_item.keys():
+                                ans.append(item_of_item_of_item["kind_title"])
+        return tuple(ans)
 
     def get_city_fields_with_title(self, title) -> tuple:
         result = self._select_(
@@ -432,6 +402,7 @@ class MongoDB(AnyBDInterface, DBContract):
             "handbooks"
         )
         ans = [item for item in result if "service_title" in item.keys() and item["service_title"] == title]
+        print(ans)
         if len(ans) == 0:
             return tuple()
         ans = tuple([
@@ -445,22 +416,180 @@ class MongoDB(AnyBDInterface, DBContract):
         return ans
 
     def get_kind_fields_with_title(self, title) -> tuple:
-        pass
+        result = self._select_(
+            {},
+            "handbooks"
+        )
+        ans = [item for item in result if "city_fleets" in item.keys()]
+        for item in ans:
+            for it in item["city_fleets"]:
+                for i in it["fleet_transport"]:
+                    if i["kind_title"] == title:
+                        return tuple(
+                            [
+                                i["kind_id"],
+                                i["kind_description"],
+                                i["kind_title"],
+                                i["kind_lifting_capacity"],
+                                i["kind_volume"]
+                            ]
+                        )
 
     def get_fleet_fields_with_title(self, title) -> tuple:
-        pass
+        result = self._select_(
+            {},
+            "handbooks"
+        )
+        ans = [item for item in result if "city_fleets" in item.keys()]
+        for item in ans:
+            for it in item["city_fleets"]:
+                if it["fleet_title"] == title:
+                    return tuple(
+                        [
+                            it["fleet_title"],
+                            it["fleet_description"],
+                            it["fleet_address"],
+                            it["fleet_square"],
+                            it["stars_quantity"]
+                        ]
+                    )
 
     def alter_city_using_str_collection(self, data):
-        pass
+        return self._update_(
+            "handbooks",
+            {
+                "city_title": data[1]
+            },
+            {
+                "_id": ObjectId(data[0])
+            }
+        )
 
     def alter_service_using_str_collection(self, data):
-        pass
+        return self._update_(
+            "handbooks",
+            {
+                "service_title": data[1],
+                "service_description": data[2],
+                "cost_weight": float(data[3]),
+                "cost_radius": float(data[4])
+            },
+            {
+                "_id": ObjectId(data[0])
+            }
+        )
 
     def alter_kind_using_str_collection(self, data):
-        pass
+        """
+                1) получить виды транспорта
+                2) удалить изменяемый вид транспорта из списка
+                3) добавить в конец списка новый (измененный)
+                4) выполнить update
+                """
+        # 1
+        results = self._select_(
+            {},
+            "handbooks"
+        )
+        ans = []
+        for item in results:
+            if "city_fleets" in item.keys():
+                for it in item["city_fleets"]:
+                    if "fleet_transport" in it.keys():
+                        for i in it["fleet_transport"]:
+                            if i["kind_id"] == ObjectId(data[0]):
+                                ans.append(item)
+                                break
+        if len(ans) == 0:
+            return
+        # 2
+        pos_i = -1
+        pos_j = -1
+        fleets_collection = ans[0]["city_fleets"]
+        for i, fleet in enumerate(fleets_collection, start=0):
+            for j, item in enumerate(fleet["fleet_transport"], start=0):
+                if "kind_id" in item.keys() and item["kind_id"] == ObjectId(data[0]):
+                    pos_i = i
+                    pos_j = j
+                    break
+        fleet_transport = copy.deepcopy(fleets_collection[pos_i]["fleet_transport"])
+        del(fleet_transport[pos_j])
+        new_elem = {
+            "transport_id": ObjectId(fleets_collection[pos_i]["fleet_transport"][pos_j]["transport_id"]),
+            "kind_id": ObjectId(data[0]),
+            "kind_description": data[1],
+            "kind_title": data[2],
+            "kind_lifting_capacity": float(data[3]),
+            "kind_volume": float(data[4]),
+        }
+        fleet_transport.append(new_elem)
+        fleets_collection[pos_i]["fleet_transport"] = fleet_transport
+        # 3
+        ans[0]["city_fleets"] = fleets_collection
+        # 4
+        return self._update_(
+            "handbooks",
+            {
+                "city_title": ans[0]["city_title"],
+                "city_fleets": ans[0]["city_fleets"]
+            },
+            {
+                "_id": ans[0]["_id"]
+            }
+        )
 
     def alter_fleet_using_str_collection(self, data):
-        pass
+        """
+        1) получить парки города
+        2) удалить изменяемый парк из списка
+        3) добавить в конец списка новый (измененный)
+        4) выполнить update
+        """
+        # 1
+        results = self._select_(
+            {},
+            "handbooks"
+        )
+        ans = []
+        for item in results:
+            if "city_fleets" in item.keys():
+                for it in item["city_fleets"]:
+                    if it["fleet_title"] == data[0]:
+                        ans.append(item)
+                        break
+        if len(ans) == 0:
+            return
+        # 2
+        fleets_collection = ans[0]["city_fleets"]
+        pos = -1
+        for i, item in enumerate(fleets_collection, start=0):
+            if item["fleet_title"] == data[0]:
+                pos = i
+                break
+        fleet_item = copy.deepcopy(fleets_collection[pos])
+        new_elem = {
+            "fleet_title": data[0],
+            "fleet_description": data[1],
+            "fleet_address": data[2],
+            "fleet_square": float(data[3]),
+            "stars_quantity": int(data[4]),
+            "fleet_transport": fleet_item["fleet_transport"]
+        }
+        del(fleets_collection[pos])
+        # 3
+        fleets_collection.append(new_elem)
+        ans[0]["city_fleets"] = fleets_collection
+        # 4
+        return self._update_(
+            "handbooks",
+            {
+                "city_title": ans[0]["city_title"],
+                "city_fleets": ans[0]["city_fleets"]
+            },
+            {
+                "_id": ans[0]["_id"]
+            }
+        )
 
     def linking_transaction(self, operator_id, courier_id, order_id) -> bool:
         ans1 = self._update_(

@@ -126,5 +126,5 @@ class HandBooks(MDScreen):
                                  DbOperator().get_fleet_fields_with_title,
                                  DbOperator().alter_fleet_using_str_collection,
                                  430,
-                                 ('fleet_id', 'title', 'description', 'address', 'square', 'stars_quantity', 'city_id')
+                                 ('title', 'description', 'address', 'square', 'stars_quantity')
                                  )

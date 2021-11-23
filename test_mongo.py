@@ -13,7 +13,7 @@ DATABASE = 'coursework'
 myclient = pymongo.MongoClient(CONNECTION_STRING)
 mydb = myclient[DATABASE]
 collections = mydb.list_collection_names()
-mycol = mydb["handbooks"]
+mycol = mydb["my_order"]
 
 
 def _select_(database, select_, from_, where_=None) -> list:
@@ -44,15 +44,21 @@ def _insert_(database, insert_into_, what_, values_=None) -> bool:
         return False
 
 
-print(_update_(mydb,
-            "my_order",
-            {
-                "executions": parser.parse(datetime.now().strftime("%Y-%m-%d %H:%M:%S")),
-                "stage_title": "Выполнен",
-                "stage_description": "Заказ в процессе выполнения.",
-            },
-            {
-                "courier_id": ObjectId("6199f45580ba05e82a68879d"),
-                "stage_title": "Выполняется"
+def get_services_titles_and_total_costs(database):
+    pipe2 = [
+        {
+            "$unwind": "$orders_services.service_title"
+        },
+        {
+            "$group": {
+                "_id": "$orders_services.service_title",
+                "total_cost": {"$sum": "$orders_services.total_cost"},
             }
-        ))
+        }
+    ]
+    results = database["my_order"].aggregate(pipeline=pipe2)
+    for x in results:
+        print(x)
+
+
+get_services_titles_and_total_costs(mydb)

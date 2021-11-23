@@ -8,8 +8,8 @@
   "executions": {
     "$date": "2021-05-02T13:30:00Z"
   },
-  "stage_title": "Выполняется",
-  "stage_description": "Заказ в процессе выполнения.",
+  "stage_title": "Выполнен",
+  "stage_description": "Заказ успешно выполнен.",
   "customer_id": {
     "$oid": "6199f45580ba05e82a68879d"
   },

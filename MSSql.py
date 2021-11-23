@@ -728,7 +728,7 @@ class MSSql(AnyBDInterface, DBContract):
         result = self._select_("*", "fleet", f"title = '{title}'")
         if len(result) == 0:
             return tuple()
-        return result[-1]
+        return result[-1][1:-1]
 
     def get_kind_fields_with_title(self, title) -> tuple:
         result = self._select_("*", "transports_kind", f"title = '{title}'")
@@ -756,14 +756,13 @@ class MSSql(AnyBDInterface, DBContract):
         sql = f"""
         UPDATE fleet
         SET
-        title = '{data[1]}',
-        description = '{data[2]}',
-        address = '{data[3]}',
-        square = {float(data[4])},
-        stars_quantity = {int(data[5])},
-        city_id = {int(data[6])}
+        title = '{data[0]}',
+        description = '{data[1]}',
+        address = '{data[2]}',
+        square = {float(data[3])},
+        stars_quantity = {int(data[4])}
         WHERE
-        fleet_id = {int(data[0])}
+        title = '{data[0]}'
         """
         self._execute_(sql)
 

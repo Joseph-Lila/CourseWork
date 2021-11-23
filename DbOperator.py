@@ -1,5 +1,5 @@
 from AnyBDInterface import AnyBDInterface
-import MongoDB, DB_Recorder
+import MSSql, MongoDB, DB_Recorder
 
 
 class DbOperator(AnyBDInterface):
@@ -114,15 +114,15 @@ class DbOperator(AnyBDInterface):
         return self.__get_outcomes_value(results, 'tuple')
 
     def get_services_titles_and_total_costs(self) -> tuple:
-        results = [item.get_services_titles_and_total_costs() for item in self.representatives_collection]
+        results = [self.representatives_collection[0].get_services_titles_and_total_costs()]
         return self.__get_outcomes_value(results, 'tuple')
 
     def get_months_quantity_orders(self) -> tuple:
-        results = [item.get_months_quantity_orders() for item in self.representatives_collection]
+        results = [self.representatives_collection[0].get_months_quantity_orders()]
         return self.__get_outcomes_value(results, 'tuple')
 
     def get_cities_quantity_orders(self) -> tuple:
-        results = [item.get_cities_quantity_orders() for item in self.representatives_collection]
+        results = [self.representatives_collection[0].get_cities_quantity_orders]
         return self.__get_outcomes_value(results, 'tuple')
 
     def check_exists_order_with_commissions_and_customer_id(self, commissions, customer_id) -> bool:
