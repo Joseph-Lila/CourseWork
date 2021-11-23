@@ -104,14 +104,19 @@ class DbOperator(AnyBDInterface):
 
     def get_city_titles(self) -> tuple:
         results = [item.get_city_titles() for item in self.representatives_collection]
+        results = [set(item) for item in results]
         return self.__get_outcomes_value(results, 'tuple')
 
     def get_fleet_titles(self) -> tuple:
         results = [item.get_fleet_titles() for item in self.representatives_collection]
+        results = [set(item) for item in results]
         return self.__get_outcomes_value(results, 'tuple')
 
     def get_kind_titles(self) -> tuple:
         results = [item.get_kind_titles() for item in self.representatives_collection]
+        results = [set(item) for item in results]
+        print(results[0])
+        print(results[1])
         return self.__get_outcomes_value(results, 'tuple')
 
     def get_services_titles_and_total_costs(self) -> tuple:
@@ -123,7 +128,7 @@ class DbOperator(AnyBDInterface):
         return self.__get_outcomes_value(results, 'tuple')
 
     def get_cities_quantity_orders(self) -> tuple:
-        results = [self.representatives_collection[0].get_cities_quantity_orders]
+        results = [self.representatives_collection[0].get_cities_quantity_orders()]
         return self.__get_outcomes_value(results, 'tuple')
 
     def check_exists_order_with_commissions_and_customer_id(self, commissions, customer_id) -> bool:
@@ -137,7 +142,7 @@ class DbOperator(AnyBDInterface):
         return self.__check_true_collection(results)
 
     def order_completed_transaction(self, user_id) -> bool:
-        results = [item.order_completed_transaction(user_id)
+        results = [item.order_completed_transaction(user_id[i])
                    for i, item in enumerate(self.representatives_collection, start=0)]
         return self.__check_true_collection(results)
 
@@ -151,46 +156,40 @@ class DbOperator(AnyBDInterface):
         return self.__check_true_collection(results)
 
     def linking_transaction(self, operator_id, courier_id, order_id) -> bool:
-        results = [item.linking_transaction(operator_id, courier_id, order_id)
-                   for item in self.representatives_collection]
+        results = [item.linking_transaction(operator_id[i], courier_id[i], order_id[i])
+                   for i, item in enumerate(self.representatives_collection, start=0)]
         return self.__check_true_collection(results)
 
     def get_paid_orders(self) -> tuple:
-        results = [item.get_paid_orders() for item in self.representatives_collection]
-        return self.__get_outcomes_value(results, 'tuple')
+        return tuple([item.get_paid_orders() for item in self.representatives_collection])
 
     def get_free_couriers(self) -> tuple:
-        results = [item.get_free_couriers() for item in self.representatives_collection]
-        return self.__get_outcomes_value(results, 'tuple')
+        return tuple([item.get_free_couriers() for item in self.representatives_collection])
 
     def get_city_fields_with_title(self, title) -> tuple:
-        results = [item.get_city_fields_with_title(title) for item in self.representatives_collection]
-        return self.__get_outcomes_value(results, 'tuple')
+        return tuple([item.get_city_fields_with_title(title) for item in self.representatives_collection])
 
     def alter_city_using_str_collection(self, data):
-        for item in self.representatives_collection:
-            item.alter_city_using_str_collection(data)
+        for i, item in enumerate(self.representatives_collection, start=0):
+            item.alter_city_using_str_collection(data[i])
 
     def get_service_fields_with_title(self, title) -> tuple:
-        results = [item.get_service_fields_with_title(title) for item in self.representatives_collection]
-        return self.__get_outcomes_value(results, 'tuple')
+        return tuple([item.get_service_fields_with_title(title) for item in self.representatives_collection])
 
     def get_kind_fields_with_title(self, title) -> tuple:
-        results = [item.get_kind_fields_with_title(title) for item in self.representatives_collection]
-        return self.__get_outcomes_value(results, 'tuple')
+        return tuple([item.get_kind_fields_with_title(title) for item in self.representatives_collection])
 
     def get_fleet_fields_with_title(self, title) -> tuple:
-        results = [item.get_fleet_fields_with_title(title) for item in self.representatives_collection]
-        return self.__get_outcomes_value(results, 'tuple')
+        return tuple([item.get_fleet_fields_with_title(title) for item in self.representatives_collection])
 
     def alter_service_using_str_collection(self, data):
-        for item in self.representatives_collection:
-            item.alter_service_using_str_collection(data)
+        for i, item in enumerate(self.representatives_collection, start=0):
+            item.alter_service_using_str_collection(data[i])
 
     def alter_kind_using_str_collection(self, data):
-        for item in self.representatives_collection:
-            item.alter_kind_using_str_collection(data)
+        for i, item in enumerate(self.representatives_collection, start=0):
+            item.alter_kind_using_str_collection(data[i])
 
     def alter_fleet_using_str_collection(self, data):
-        for item in self.representatives_collection:
-            item.alter_fleet_using_str_collection(data)
+        for i, item in enumerate(self.representatives_collection, start=0):
+            item.alter_fleet_using_str_collection(data[i])

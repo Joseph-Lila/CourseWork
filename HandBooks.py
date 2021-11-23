@@ -47,7 +47,7 @@ class HandBooks(MDScreen):
 
     def any_action(self, entity_func, alter_func, title, height, helper_text_collection, *args):
         entity = entity_func(title)
-        if len(entity) == 0:
+        if len(entity[-1]) == 0:
             self.note.universal_note('Выбрнной Вами сущности не существует...', [])
         else:
             self.cont.clear()
@@ -60,17 +60,23 @@ class HandBooks(MDScreen):
                                                           on_press=partial(self.change_record, alter_func)
                                                           )
                                     )
-            i = 0
-            disabled = True
-            for item in entity:
-                self.cont[0].add_widget(self.__txt_field(str(item), helper_text_collection[i], disabled))
-                i += 1
-                disabled = False
+            self.cont[0].add_widget(self.__txt_field(str(entity[0][0])+". "+str(entity[1][0]),
+                                                     helper_text_collection[0], True))
+            for i in range(len(entity[0]) - 1):
+                self.cont[0].add_widget(self.__txt_field(str(entity[0][i+1]), helper_text_collection[i+1], False))
             self.note.note_with_container(self.cont, 'Окно редактирования', (.9, .6))
 
     def change_record(self, changes_func, *args):
         collection = [child.text for child in self.cont[0].children if isinstance(child, MDTextField)]
         collection.reverse()
+        col1 = [collection[0].split(". ")[0]]
+        col2 = [collection[0].split(". ")[1]]
+        for i in range(len(collection) - 1):
+            col1.append(collection[i+1])
+            col2.append(collection[i+1])
+        collection.clear()
+        collection.append(col1)
+        collection.append(col2)
         changes_func(collection)
 
     def fill_any_department(self, cont, data_func, on_press_func, entity_func, alter_func, height,

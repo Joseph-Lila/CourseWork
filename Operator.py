@@ -25,11 +25,11 @@ class Operator(MDScreen):
         cont[-1].clear_widgets()
         self.titles.clear()
         items_to_show = get_func()
-        if len(items_to_show) == 0:
+        if len(items_to_show[-1]) == 0:
             return
         cont[-1].add_widget(Widget())
-        for i in range(len(items_to_show)):
-            self.titles.append(items_to_show[i])
+        for i in range(len(items_to_show[-1])):
+            self.titles.append(str(items_to_show[0][i])+". "+str(items_to_show[1][i]))
             cont[-1].add_widget(ToggleButton(text=str(self.titles[-1]),
                                              size_hint_y=None,
                                              height='48dp',
@@ -42,16 +42,17 @@ class Operator(MDScreen):
         courier_id = 0
         for i in self.cont1.children:
             if isinstance(i, ToggleButton) and i.state == 'down':
-                courier_id = i.text
+                courier_id = i.text.split(". ")
         for i in self.cont2.children:
             if isinstance(i, ToggleButton) and i.state == 'down':
-                order_id = i.text
+                order_id = i.text.split(". ")
         if not DbOperator().linking_transaction(User.User.user_id,
                                                 courier_id,
                                                 order_id):
             self.note.universal_note('Операция прервана!', [])
             return
         self.note.universal_note('Заказ был передан курьеру!', [])
+        self.load_data()
 
     def load_data(self, *args):
         if not DbOperator().try_connection():
